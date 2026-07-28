@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: baou_finance_backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/data:/app/data
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    restart: always
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: baou_finance_admin
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always

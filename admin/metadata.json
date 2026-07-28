@@ -1,0 +1,6 @@
+{
+  "name": "Éléphant Bourse",
+  "description": "Portail d'administration d'Éléphant Bourse pour la validation des transactions, la gestion des utilisateurs, la surveillance du marché et le support technique.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
