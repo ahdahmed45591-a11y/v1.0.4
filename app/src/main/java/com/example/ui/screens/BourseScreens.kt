@@ -3686,7 +3686,7 @@ fun ProfileScreen(viewModel: BourseViewModel) {
             }
 
             Text(nameText, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
-            val refID = "EB-${(100000..999999).random()}"
+            val refID = remember { "EB-${(100000..999999).random()}" }
             Text("ID: $refID", fontSize = 12.sp, color = TextSecondary)
 
             Box(
