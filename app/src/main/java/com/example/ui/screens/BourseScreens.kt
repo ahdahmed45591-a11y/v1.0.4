@@ -4085,12 +4085,13 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             }
                             Button(
                                 onClick = {
-                                    if (messageText.isBlank()) return@Button
-                                    isSending = true
-                                    viewModel.sendSupportMessage { success ->
-                                        isSending = false
-                                        if (success) {
-                                            activeDialog = null
+                                    if (messageText.isNotBlank()) {
+                                        isSending = true
+                                        viewModel.sendSupportMessage { success ->
+                                            isSending = false
+                                            if (success) {
+                                                activeDialog = null
+                                            }
                                         }
                                     }
                                 },
