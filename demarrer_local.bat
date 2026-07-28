@@ -3,7 +3,7 @@ title BAOU Finance - Lanceur Automatique SQLite v1.0.4
 cls
 
 set "ROOT_DIR=%~dp0"
-set "PATH=C:\Users\ABOU CISSE\nodejs;C:\Users\ABOU CISSE\ngrok;C:\Users\ABOU CISSE\git\cmd;%PATH%"
+set "PATH=C:\Users\ABOU CISSE\nodejs;C:\Users\ABOU CISSE\ngrok;C:\Users\ABOU CISSE\git\cmd;C:\Users\ABOU CISSE\gh\bin;%PATH%"
 
 
 echo ========================================================
