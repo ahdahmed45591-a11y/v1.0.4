@@ -48,7 +48,7 @@ import com.example.viewmodel.BourseViewModel
 import com.example.viewmodel.Screen
 import com.example.viewmodel.StockWatchItem
 @Composable
-fun baouTextFieldColors() = OutlinedTextFieldDefaults.colors(
+fun baouTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
     focusedTextColor = TextPrimary,
     unfocusedTextColor = TextPrimary,
     focusedContainerColor = SurfaceCard2,
