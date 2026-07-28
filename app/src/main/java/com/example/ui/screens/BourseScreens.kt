@@ -443,13 +443,13 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                     OutlinedTextField(
                         value = passwordInput,
                         onValueChange = { 
-                            if (it.length <= 5 && it.all { char -> char.isDigit() }) {
+                            if (it.length <= 12 && !it.contains(" ")) {
                                 passwordInput = it
                                 errorMsg = ""
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(if (isRegisterMode) "Code PIN secret (5 chiffres)" else "Code PIN à 5 chiffres") },
+                        label = { Text(if (isRegisterMode) "Code PIN secret (au moins 6 chiffres)" else "Code PIN secret (au moins 6 chiffres)") },
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF8200)) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -473,13 +473,13 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         OutlinedTextField(
                             value = passwordConfirmInput,
                             onValueChange = { 
-                                if (it.length <= 5 && it.all { char -> char.isDigit() }) {
+                                if (it.length <= 12 && !it.contains(" ")) {
                                     passwordConfirmInput = it
                                     errorMsg = ""
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Confirmer le Code PIN (5 chiffres)") },
+                            label = { Text("Confirmer le Code PIN (au moins 6 chiffres)") },
                             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF8200)) },
                             visualTransformation = if (passwordVisible)
                                 androidx.compose.ui.text.input.VisualTransformation.None
@@ -516,8 +516,8 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                                 errorMsg = "Adresse e-mail invalide."
                                 return@Button
                             }
-                            if (passwordInput.length != 5 || !passwordInput.all { char -> char.isDigit() }) {
-                                errorMsg = "Le code PIN doit comporter exactement 5 chiffres."
+                            if (passwordInput.length < 6) {
+                                errorMsg = "Le code PIN secret doit contenir au moins 6 caractères."
                                 return@Button
                             }
 
@@ -527,9 +527,10 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                                     return@Button
                                 }
                                 if (passwordInput != passwordConfirmInput) {
-                                    errorMsg = "Les deux codes PIN à 5 chiffres ne correspondent pas."
+                                    errorMsg = "Les deux codes PIN secrets ne correspondent pas."
                                     return@Button
                                 }
+
                                 isLoading = true
                                 viewModel.performRegister(emailInput.trim(), passwordInput, firstNameInputText) { err ->
                                     isLoading = false

@@ -27,8 +27,8 @@ router.post('/register', async (req, res) => {
   if (!email || !password || !firstName) {
     return res.status(400).json({ error: 'Prénom, email et mot de passe/code PIN requis.' });
   }
-  if (password.length < 4) {
-    return res.status(400).json({ error: 'Le mot de passe ou code PIN doit contenir au moins 4 caractères.' });
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Le mot de passe ou code PIN doit contenir au moins 6 caractères.' });
   }
 
 
