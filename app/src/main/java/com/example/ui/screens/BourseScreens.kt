@@ -50,28 +50,86 @@ import java.util.Locale
 
 fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, pdfContent: String): Boolean {
     return try {
+        val pdfDocument = android.graphics.pdf.PdfDocument()
+        val pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create() // format A4 en points (72 dpi)
+        val page = pdfDocument.startPage(pageInfo)
+        val canvas = page.canvas
+
+        val paintTitle = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(11, 28, 48) // Dark Navy #0B1C30
+            textSize = 18f
+            isFakeBoldText = true
+        }
+
+        val paintSubtitle = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(255, 130, 0) // Orange BAOU #FF8200
+            textSize = 13f
+            isFakeBoldText = true
+        }
+
+        val paintLine = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(222, 193, 175)
+            strokeWidth = 2f
+        }
+
+        val paintBody = android.graphics.Paint().apply {
+            color = android.graphics.Color.rgb(30, 41, 59)
+            textSize = 12f
+        }
+
+        // Header du PDF
+        var y = 50f
+        canvas.drawText("BAOU Finance — Reçu Officiel Éléphant Bourse", 40f, y, paintTitle)
+        y += 20f
+        canvas.drawText("DOCUMENT CONTRACTUEL SGI — BRVM", 40f, y, paintSubtitle)
+        y += 15f
+        canvas.drawLine(40f, y, 555f, y, paintLine)
+        y += 30f
+
+        // Écriture du contenu ligne par ligne
+        val lines = pdfContent.split("\n")
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("===") || trimmed.startsWith("---")) {
+                canvas.drawLine(40f, y, 555f, y, paintLine)
+                y += 20f
+            } else if (trimmed.isNotEmpty()) {
+                canvas.drawText(trimmed, 40f, y, paintBody)
+                y += 22f
+            } else {
+                y += 10f
+            }
+            if (y > 780f) break // Limite de page A4
+        }
+
+        pdfDocument.finishPage(page)
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             val resolver = context.contentResolver
             val contentValues = android.content.ContentValues().apply {
-                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, if (fileName.endsWith(".pdf")) fileName else "$fileName.pdf")
                 put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
                 put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
             }
             val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
             if (uri != null) {
                 resolver.openOutputStream(uri)?.use { outputStream ->
-                    outputStream.write(pdfContent.toByteArray(Charsets.UTF_8))
+                    pdfDocument.writeTo(outputStream)
                 }
+                pdfDocument.close()
                 true
-            } else false
+            } else {
+                pdfDocument.close()
+                false
+            }
         } else {
             val downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
             if (!downloadDir.exists()) downloadDir.mkdirs()
-            val file = java.io.File(downloadDir, fileName)
-            file.writeText(pdfContent, Charsets.UTF_8)
-            val mediaScanIntent = android.content.Intent(android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            mediaScanIntent.data = android.net.Uri.fromFile(file)
-            context.sendBroadcast(mediaScanIntent)
+            val file = java.io.File(downloadDir, if (fileName.endsWith(".pdf")) fileName else "$fileName.pdf")
+            val outputStream = java.io.FileOutputStream(file)
+            pdfDocument.writeTo(outputStream)
+            outputStream.close()
+            pdfDocument.close()
             true
         }
     } catch (e: Exception) {
@@ -79,6 +137,7 @@ fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, p
         false
     }
 }
+
 
 // Helper extension to format currency
 fun Double.formatFcfa(): String {
