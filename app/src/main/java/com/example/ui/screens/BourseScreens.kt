@@ -49,21 +49,15 @@ import com.example.viewmodel.Screen
 import com.example.viewmodel.StockWatchItem
 @Composable
 fun baouTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor           = TextPrimary,
-    unfocusedTextColor         = TextPrimary,
-    focusedContainerColor       = SurfaceCard2,
-    unfocusedContainerColor     = SurfaceCard,
-    focusedBorderColor         = OrangeBrand,
-    unfocusedBorderColor       = BorderMedium,
-    focusedLabelColor          = OrangeBrand,
-    unfocusedLabelColor        = TextSecondary,
-    focusedLeadingIconColor    = OrangeBrand,
-    unfocusedLeadingIconColor  = TextSecondary,
-    focusedTrailingIconColor   = OrangeBrand,
-    unfocusedTrailingIconColor = TextSecondary,
-    cursorColor                = OrangeBrand,
-    focusedPlaceholderColor    = TextMuted,
-    unfocusedPlaceholderColor  = TextMuted
+    focusedTextColor = TextPrimary,
+    unfocusedTextColor = TextPrimary,
+    focusedContainerColor = SurfaceCard2,
+    unfocusedContainerColor = SurfaceCard,
+    focusedBorderColor = OrangeBrand,
+    unfocusedBorderColor = BorderMedium,
+    focusedLabelColor = OrangeBrand,
+    unfocusedLabelColor = TextSecondary,
+    cursorColor = OrangeBrand
 )
 
 fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, pdfContent: String): Boolean {
