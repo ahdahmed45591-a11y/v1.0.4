@@ -2613,14 +2613,16 @@ fun MarketScreen(viewModel: BourseViewModel) {
 // 6. PORTFOLIO / PORTEFEUILLE SCREEN
 @Composable
 fun PortfolioScreen(viewModel: BourseViewModel) {
-    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val holdings by viewModel.holdings.collectAsStateWithLifecycle()
-    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
+    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
 
     var activeSellHolding by remember { mutableStateOf<HoldingsEntity?>(null) }
     var sellQtyInput by remember { mutableStateOf("") }
+    var selectedTimeframe by remember { mutableStateOf("1M") }
 
-    val context = LocalContext.current
+    val netValue = (userProfile?.portfolioValue ?: 0.0) + (userProfile?.cashBalance ?: 0.0)
+    val stockEquityValue = userProfile?.portfolioValue ?: 0.0
+    val cashBalance = userProfile?.cashBalance ?: 0.0
 
     Column(
         modifier = Modifier
@@ -2629,7 +2631,7 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // App top header
+        // Top Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -2638,16 +2640,26 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(OrangeBrand.copy(alpha = 0.12f)),
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(OrangeBrand.copy(alpha = 0.15f))
+                        .border(1.dp, OrangeBrand.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Folder, contentDescription = null, tint = OrangeBrand)
+                    Icon(Icons.Default.Folder, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(24.dp))
                 }
                 Column {
-                    Text("Mon Portefeuille", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("Suivez vos investissements.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Mon Portefeuille",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Text(
+                        "Suivi du patrimoine BRVM SGI",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
                 }
             }
 
@@ -2655,51 +2667,110 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                 onClick = { viewModel.navigateTo(Screen.DEPOSIT) },
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(OrangeBrand.copy(alpha = 0.12f))
+                    .background(SurfaceCard2)
+                    .border(1.dp, BorderSubtle, CircleShape)
                     .testTag("add_funds_header")
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Dépôt", tint = OrangeBrand)
             }
         }
 
-        // Dashboard Hero value card
+        // Hero Portfolio Card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, GrayBorder)
+            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(1.dp, BorderSubtle),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "VALEUR TOTALE DU PORTEFEUILLE",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 1.sp
-                )
-
-                val netValue = (userProfile?.portfolioValue ?: 0.0) + (userProfile?.cashBalance ?: 0.0)
-                Text(
-                    text = netValue.formatFcfa(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = DarkOnBackground,
-                    fontSize = 30.sp
-                )
-
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100.dp))
-                        .background(ForestGreen.copy(alpha = 0.15f))
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.TrendingUp, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(14.dp))
-                    Text("Portefeuille Titres SGI BRVM", style = MaterialTheme.typography.labelSmall, color = ForestGreen, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "VALEUR TOTALE DU PORTEFEUILLE",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary,
+                        letterSpacing = 1.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(GoldPremium.copy(alpha = 0.15f))
+                            .border(1.dp, GoldPremium.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            "AMF-UMOA",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldPremium
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                // Total Amount
+                Text(
+                    text = netValue.formatFcfa(),
+                    style = MaterialTheme.typography.displayLarge.copy(fontFamily = MonoFamily),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = TextPrimary,
+                    fontSize = 32.sp
+                )
+
+                // Performance Pill + Growth indicator
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(100.dp))
+                            .background(GainGreenBg)
+                            .border(1.dp, GainGreen.copy(alpha = 0.3f), RoundedCornerShape(100.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = GainGreen, modifier = Modifier.size(16.dp))
+                        Text(
+                            "+12.4% (global)",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = GainGreen,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Timeframe tabs
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        listOf("1J", "1S", "1M", "1A", "TOUT").forEach { tf ->
+                            val isSelected = selectedTimeframe == tf
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) OrangeBrand else SurfaceCard2)
+                                    .clickable { selectedTimeframe = tf }
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    tf,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) Color.White else TextSecondary
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = BorderSubtle)
 
                 // Micro-visualizer graph
                 BarVisualizer(
@@ -2707,148 +2778,283 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                         .fillMaxWidth()
                         .height(64.dp)
                 )
-            }
-        }
 
-        // Available Balance box
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-            border = BorderStroke(1.dp, GrayBorder)
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text("SOLDE DISPONIBLE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    val availCash = userProfile?.cashBalance ?: 0.0
-                    Text(availCash.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Text("Prêt à investir", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-
-                Button(
-                    onClick = { viewModel.navigateTo(Screen.DEPOSIT) },
-                    colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Déposer", fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        // Mes Actions holdings list
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Mes Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("${holdings.size} Actifs", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-
-            if (holdings.isEmpty()) {
-                Card(
+                // Hero Quick Actions
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, GrayBorder)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Button(
+                        onClick = { viewModel.navigateTo(Screen.DEPOSIT) },
+                        modifier = Modifier.weight(1f).height(46.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.FolderOpen, contentDescription = null, tint = GrayBorder, modifier = Modifier.size(48.dp))
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text("Aucune action détenue", fontWeight = FontWeight.Bold)
-                        Text("Achetez des actions sur l'onglet Marché.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Déposer", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+
+                    OutlinedButton(
+                        onClick = { viewModel.navigateTo(Screen.MARKET) },
+                        modifier = Modifier.weight(1f).height(46.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, BorderMedium),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
+                    ) {
+                        Icon(Icons.Default.ShowChart, contentDescription = null, modifier = Modifier.size(18.dp), tint = OrangeBrand)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Marché BRVM", fontWeight = FontWeight.Bold, color = TextPrimary)
                     }
                 }
-            } else {
-                holdings.forEach { holding ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, GrayBorder)
+            }
+        }
+
+        // Assets Split Stats Cards (Actions vs Liquidités)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Stock Equity Card
+            Card(
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(Icons.Default.PieChart, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(16.dp))
+                        Text("TITRES / ACTIONS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                    }
+                    Text(
+                        stockEquityValue.formatFcfa(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = TextPrimary
+                    )
+                    Text(
+                        "${holdings.size} ligne(s) active(s)",
+                        fontSize = 11.sp,
+                        color = TextSecondary
+                    )
+                }
+            }
+
+            // Cash Balance Card
+            Card(
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = GainGreen, modifier = Modifier.size(16.dp))
+                        Text("LIQUIDITÉS CASH", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                    }
+                    Text(
+                        cashBalance.formatFcfa(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = GainGreen
+                    )
+                    Text(
+                        "Prêt à investir",
+                        fontSize = 11.sp,
+                        color = TextSecondary
+                    )
+                }
+            }
+        }
+
+        // Holdings List Section Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Mes Positions & Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(OrangeBrand.copy(alpha = 0.15f))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text("${holdings.size}", fontWeight = FontWeight.Bold, color = OrangeBrand, fontSize = 12.sp)
+                }
+            }
+        }
+
+        // Holdings Cards
+        if (holdings.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(Icons.Default.FolderOpen, contentDescription = null, tint = TextMuted, modifier = Modifier.size(48.dp))
+                    Text("Aucune action détenue", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 16.sp)
+                    Text(
+                        "Explorez les sociétés cotées à la BRVM et constituez votre premier portefeuille d'actions.",
+                        fontSize = 13.sp,
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center
+                    )
+                    Button(
+                        onClick = { viewModel.navigateTo(Screen.MARKET) },
+                        colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("Explorer le Marché BRVM", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+            }
+        } else {
+            holdings.forEach { holding ->
+                val priceVal = holding.currentPrice * holding.sharesCount
+                val profitVal = (holding.currentPrice - holding.averagePrice) * holding.sharesCount
+                val isGain = holding.changePercent >= 0
+                val gainColor = if (isGain) GainGreen else LossRed
+                val gainBg = if (isGain) GainGreenBg else LossRedBg
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, BorderSubtle)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        // Top row: Ticker, Name, Total Value & Change %
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Top
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(holding.ticker, fontWeight = FontWeight.Bold, fontSize = 10.sp)
-                                    }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(holding.companyName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(SurfaceCard2)
+                                        .border(1.dp, BorderMedium, RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        holding.ticker,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 11.sp,
+                                        color = OrangeBrand
+                                    )
                                 }
 
-                                Column(horizontalAlignment = Alignment.End) {
-                                    val priceVal = holding.currentPrice * holding.sharesCount
-                                    Text(priceVal.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-                                    val prefix = if (holding.changePercent >= 0) "+" else ""
-                                    val color = if (holding.changePercent >= 0) ForestGreen else RedLoss
-                                    Text("$prefix${holding.changePercent}%", color = color, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Column {
+                                    Text(holding.companyName, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+                                    Text("${holding.sharesCount} titre(s) détenu(s)", fontSize = 12.sp, color = TextSecondary)
                                 }
                             }
 
-                            HorizontalDivider(color = GrayBorder.copy(alpha = 0.5f))
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(priceVal.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = TextPrimary)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(gainBg)
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    val prefix = if (isGain) "+" else ""
+                                    Text(
+                                        "$prefix${holding.changePercent}%",
+                                        color = gainColor,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
+                        }
 
+                        // Spec Table Box
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(SurfaceCard2)
+                                .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                                .padding(12.dp)
+                        ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("TITRES", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    Text("${holding.sharesCount}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text("PRIX MOYEN D'ACHAT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                                    Text(holding.averagePrice.formatFcfa(), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextPrimary)
+                                }
+                                Column {
+                                    Text("PRIX ACTUEL", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                                    Text(holding.currentPrice.formatFcfa(), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextPrimary)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("VALEUR D'ACHAT MOYENNE", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    Text(holding.averagePrice.formatFcfa(), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text("PLUS/MOINS VALUE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                                    val profitPrefix = if (profitVal >= 0) "+" else ""
+                                    Text("$profitPrefix${profitVal.formatFcfa()}", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = gainColor)
                                 }
                             }
+                        }
 
-                            // Interactive inline sell simulator
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        // Inline Action Buttons (Acheter / Vendre)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Button(
+                                onClick = { viewModel.selectStockAndNavigate(holding.ticker) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(38.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand.copy(alpha = 0.15f), contentColor = OrangeBrand),
+                                shape = RoundedCornerShape(10.dp)
                             ) {
-                                Button(
-                                    onClick = { viewModel.selectStockAndNavigate(holding.ticker) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(36.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand.copy(alpha = 0.12f), contentColor = OrangeBrand),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Acheter plus", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                }
-                                Button(
-                                    onClick = {
-                                        sellQtyInput = ""
-                                        activeSellHolding = holding
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(36.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.error),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Vendre", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                }
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Acheter plus", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Button(
+                                onClick = {
+                                    sellQtyInput = ""
+                                    activeSellHolding = holding
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(38.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = LossRedBg, contentColor = LossRed),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Vendre", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -2856,20 +3062,34 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
             }
         }
 
-        // Trading open hour note
+        // BRVM Trading Open Hour Card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(1.dp, GrayBorder)
+            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, BorderSubtle)
         ) {
-            Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(Icons.Default.Lightbulb, contentDescription = null, tint = OrangeBrand)
+            Row(
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(OrangeBrand.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Lightbulb, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(20.dp))
+                }
                 Column {
-                    Text("Le saviez-vous ?", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Horaires du Marché BRVM", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Le marché de la BRVM est ouvert de 09:00 à 15:00 GMT. Vos ordres passés en dehors de ces horaires seront placés en file d'attente pour l'ouverture.",
+                        text = "Le marché BRVM ouvre de 09:00 à 15:00 GMT. Les ordres passés hors séance sont enregistrés et exécutés dès l'ouverture.",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = TextSecondary,
                         lineHeight = 16.sp
                     )
                 }
@@ -3024,7 +3244,6 @@ fun DepositScreen(viewModel: BourseViewModel) {
             OutlinedTextField(
                 value = amountInput,
                 onValueChange = { viewModel.depositAmountInput.value = it },
-                
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("deposit_amount_field"),
@@ -3035,7 +3254,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(Icons.Default.Info, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(14.dp))
-                Text("Dépôt minimum : 1 000 FCFA", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Saisissez le montant de votre choix", fontSize = 11.sp, color = TextSecondary)
             }
         }
 
@@ -3154,7 +3373,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
                 .height(54.dp)
                 .testTag("confirm_deposit_button"),
             colors = ButtonDefaults.buttonColors(containerColor = if (isVerified) OrangeBrand else Color.Gray),
-            enabled = isVerified && amtDouble >= 1000.0,
+            enabled = isVerified && amtDouble > 0.0,
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(

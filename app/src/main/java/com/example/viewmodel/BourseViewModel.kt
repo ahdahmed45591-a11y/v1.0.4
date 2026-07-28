@@ -463,9 +463,9 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         val amt = depositAmountInput.value.toDoubleOrNull()
-        if (amt == null || amt < 1000) {
+        if (amt == null || amt <= 0) {
             viewModelScope.launch {
-                _transactionStatus.emit("Le dépôt minimum est de 1 000 FCFA.")
+                _transactionStatus.emit("Veuillez saisir un montant valide pour le dépôt.")
             }
             return
         }
