@@ -1,61 +1,69 @@
 package com.example.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme =
-  darkColorScheme(
-    primary = OrangeBrand,
-    secondary = GainGreen,
-    tertiary = GoldPremium,
-    background = DeepNavy,
-    surface = DeepNavySurface,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White
-  )
+// ══════════════════════════════════════════════════════════
+//  🎨 BAOU Finance — Dark Finance Premium Theme v2.0
+//  Dark Mode par défaut (style Binance / Robinhood)
+// ══════════════════════════════════════════════════════════
 
-private val LightColorScheme =
-  lightColorScheme(
-    primary = OrangeBrand,
-    secondary = GainGreen,
-    tertiary = GoldPremium,
-    background = LightBackground,
-    surface = LightSurface,
-    surfaceVariant = SurfaceVariant,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = DarkOnBackground,
-    onSurface = DarkOnBackground,
-    error = LossRed
-  )
+private val DarkFinanceColorScheme = darkColorScheme(
+    // Brand
+    primary          = OrangeBrand,
+    onPrimary        = Color.White,
+    primaryContainer = OrangeBrandLight,
+    onPrimaryContainer = OrangeBrand,
+
+    // Secondary — Gain / Vert
+    secondary        = GainGreen,
+    onSecondary      = Color(0xFF003828),
+    secondaryContainer = GainGreenBg,
+    onSecondaryContainer = GainGreen,
+
+    // Tertiary — Gold Premium
+    tertiary         = GoldPremium,
+    onTertiary       = Color(0xFF1A1000),
+    tertiaryContainer = GoldPremiumLight,
+
+    // Backgrounds — Nuit Financière
+    background       = DeepBackground,
+    onBackground     = TextPrimary,
+
+    // Surfaces — Cartes & Composants
+    surface          = SurfaceCard,
+    onSurface        = TextPrimary,
+    surfaceVariant   = SurfaceCard2,
+    onSurfaceVariant = TextSecondary,
+
+    // Outline / Borders
+    outline          = BorderSubtle,
+    outlineVariant   = BorderMedium,
+
+    // Error
+    error            = LossRed,
+    onError          = Color.White,
+    errorContainer   = LossRedBg,
+
+    // Inverse (pour snackbar / toast)
+    inverseSurface   = TextPrimary,
+    inverseOnSurface = DeepBackground,
+    inversePrimary   = OrangeDeep,
+
+    // Scrim
+    scrim            = Color(0xCC080E1C),
+)
 
 @Composable
 fun MyApplicationTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  dynamicColor: Boolean = false, // Keep consistent BAOU brand colors
-  content: @Composable () -> Unit,
+    content: @Composable () -> Unit,
 ) {
-  val colorScheme =
-    when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
-    }
-
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+    // Dark Finance Premium — toujours sombre
+    MaterialTheme(
+        colorScheme = DarkFinanceColorScheme,
+        typography  = Typography,
+        content     = content
+    )
 }

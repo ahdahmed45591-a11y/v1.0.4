@@ -25,10 +25,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +49,7 @@ import com.example.viewmodel.Screen
 import com.example.viewmodel.StockWatchItem
 import java.text.NumberFormat
 import java.util.Locale
+
 
 fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, pdfContent: String): Boolean {
     return try {
@@ -202,60 +205,87 @@ fun BourseMainLayout(viewModel: BourseViewModel) {
 
 @Composable
 fun BourseBottomNavBar(currentScreen: Screen, onNavigate: (Screen) -> Unit) {
-    Surface(
+    val navItems = listOf(
+        Triple(Screen.DASHBOARD,  Icons.Default.Home,                 "Accueil"),
+        Triple(Screen.MARKET,     Icons.Default.TrendingUp,           "Marché"),
+        Triple(Screen.PORTFOLIO,  Icons.Default.AccountBalanceWallet, "Portfolio"),
+        Triple(Screen.PROFILE,    Icons.Default.Person,               "Profil")
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .windowInsetsPadding(WindowInsets.navigationBars),
-        shape = RoundedCornerShape(28.dp),
-        color = DeepNavy,
-        shadowElevation = 10.dp,
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.12f))
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 6.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier        = Modifier.fillMaxWidth(),
+            shape           = RoundedCornerShape(32.dp),
+            color           = Color(0xFF0D1525),
+            shadowElevation = 24.dp,
+            border          = BorderStroke(1.dp, BorderSubtle)
         ) {
-            val navItems = listOf(
-                Triple(Screen.DASHBOARD, Icons.Default.Home, "Accueil"),
-                Triple(Screen.MARKET, Icons.Default.TrendingUp, "Marché"),
-                Triple(Screen.PORTFOLIO, Icons.Default.AccountBalanceWallet, "Portfolio"),
-                Triple(Screen.PROFILE, Icons.Default.Person, "Profil")
-            )
+            Row(
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment     = Alignment.CenterVertically
+            ) {
+                navItems.forEach { (screen, icon, label) ->
+                    val isSelected = currentScreen == screen
+                    val itemScale by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue   = if (isSelected) 1.06f else 1f,
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                            stiffness    = androidx.compose.animation.core.Spring.StiffnessMedium
+                        ),
+                        label = "navScale_$label"
+                    )
 
-            navItems.forEach { (screen, icon, label) ->
-                val isSelected = currentScreen == screen
-                val backgroundColor = if (isSelected) OrangeBrand else Color.Transparent
-                val contentColor = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f)
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(backgroundColor)
-                        .clickable { onNavigate(screen) }
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = label,
-                            tint = contentColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        if (isSelected) {
-                            Text(
-                                text = label,
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer { scaleX = itemScale; scaleY = itemScale }
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(
+                                if (isSelected)
+                                    Brush.linearGradient(listOf(OrangeBrand, OrangeDeep))
+                                else
+                                    Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                             )
+                            .clickable(
+                                indication        = null,
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                            ) { onNavigate(screen) }
+                            .padding(
+                                horizontal = if (isSelected) 18.dp else 14.dp,
+                                vertical   = 9.dp
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment     = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector    = icon,
+                                contentDescription = label,
+                                tint           = if (isSelected) Color.White else TextMuted,
+                                modifier       = Modifier.size(20.dp)
+                            )
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = isSelected,
+                                enter   = fadeIn(tween(200)) + expandHorizontally(tween(200)),
+                                exit    = fadeOut(tween(150)) + shrinkHorizontally(tween(150))
+                            ) {
+                                Text(
+                                    text          = label,
+                                    color         = Color.White,
+                                    fontSize      = 12.sp,
+                                    fontWeight    = FontWeight.Bold,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -263,6 +293,7 @@ fun BourseBottomNavBar(currentScreen: Screen, onNavigate: (Screen) -> Unit) {
         }
     }
 }
+
 
 
 // 1. WELCOME SCREEN
@@ -323,8 +354,9 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
-                tonalElevation = 6.dp
+                color = SurfaceCard,
+                tonalElevation = 6.dp,
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
                 Column(
                     modifier = Modifier
@@ -638,11 +670,25 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
         }
     }
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.0f to Color(0xFF080E1C),
+                        0.5f to Color(0xFF0D1525),
+                        1.0f to Color(0xFF0A1220)
+                    )
+                )
+            )
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(horizontal = 24.dp)
+            .padding(top = 16.dp, bottom = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -655,146 +701,225 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Configuration Serveur",
-                    tint = OrangeBrand
+                    tint = TextMuted
                 )
             }
         }
 
-        // Branding
+        // Branding avec halo orange
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f, fill = false)
         ) {
-            ElephantLogoCanvas(
+            // Logo avec effet de halo
+            Box(
                 modifier = Modifier
-                    .size(160.dp)
-                    .padding(bottom = 24.dp)
-            )
-
-            Text(
-                text = "Bienvenue sur\nÉléphant Bourse",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = DarkOnBackground,
-                lineHeight = 36.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Votre passerelle vers le marché financier ivoirien.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // Action Buttons
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Bouton Ouvrir un compte / Se connecter avec Code PIN 5 chiffres
-            Button(
-                onClick = {
-                    viewModel.showGoogleAccountChooser.value = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .testTag("open_account_button"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ForestGreen,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(12.dp)
+                    .size(180.dp)
+                    .padding(bottom = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.PersonAdd, contentDescription = null)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Ouvrir un compte / Se connecter",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                // Halo orange derrière le logo
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    OrangeBrand.copy(alpha = 0.25f),
+                                    OrangeBrand.copy(alpha = 0.0f)
+                                )
+                            )
+                        )
+                )
+                ElephantLogoCanvas(
+                    modifier = Modifier.size(130.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Tagline principale — grand et impactant
+            Text(
+                text      = "INVESTISSEZ\nEN BRVM",
+                style     = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                color     = TextPrimary,
+                lineHeight = 40.sp,
+                letterSpacing = (-0.5).sp
+            )
 
-            // Trust Box
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, GrayBorder.copy(alpha = 0.5f)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = "Sécurité",
-                        tint = OrangeBrand,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Text(
-                        text = "Votre sécurité est notre priorité. Vos données sont chiffrées selon les standards bancaires.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 16.sp
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text   = "Votre accès direct au marché financier\nivoirien — BRVM, 66 titres, en direct.",
+                style  = MaterialTheme.typography.bodyMedium,
+                color  = TextSecondary,
+                textAlign = TextAlign.Center,
+                modifier  = Modifier.padding(horizontal = 12.dp),
+                lineHeight = 20.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Footer Linkages
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        // ── CTA Section ──────────────────────────────────────
+        Column(
+            modifier              = Modifier.fillMaxWidth(),
+            horizontalAlignment   = Alignment.CenterHorizontally,
+            verticalArrangement   = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Besoin d'aide ?",
-                style = MaterialTheme.typography.labelLarge,
-                color = OrangeBrand,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { viewModel.navigateTo(Screen.HELP) }
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+            // Bouton principal — gradient orange premium
             Box(
                 modifier = Modifier
-                    .size(4.dp)
-                    .clip(CircleShape)
-                    .background(GrayBorder)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+                    .fillMaxWidth()
+                    .height(58.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Brush.horizontalGradient(listOf(OrangeBrand, OrangeDeep)))
+                    .clickable { viewModel.showGoogleAccountChooser.value = true }
+                    .testTag("open_account_button"),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.AccountBalanceWallet,
+                        contentDescription = null,
+                        tint     = Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text       = "Commencer à investir",
+                        color      = Color.White,
+                        fontSize   = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.3.sp
+                    )
+                }
+            }
+
+            // Bouton secondaire — connexion (outline sombre)
+            OutlinedButton(
+                onClick  = { viewModel.showGoogleAccountChooser.value = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape  = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, BorderMedium),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = TextPrimary,
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Icon(
+                    Icons.Default.Login,
+                    contentDescription = null,
+                    tint     = TextSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text       = "Se connecter",
+                    fontWeight = FontWeight.SemiBold,
+                    color      = TextSecondary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Trust Badges — 3 colonnes
+            Row(
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceCard)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment     = Alignment.CenterVertically
+            ) {
+                // Badge 1 — BRVM Officiel
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.TrendingUp, contentDescription = null,
+                        tint     = GainGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text("BRVM Officiel", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                }
+                // Séparateur vertical
+                Box(modifier = Modifier.width(1.dp).height(32.dp).background(BorderSubtle))
+                // Badge 2 — AMF-UMOA
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.VerifiedUser, contentDescription = null,
+                        tint     = GoldPremium,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text("Agréé AMF-UMOA", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                }
+                // Séparateur vertical
+                Box(modifier = Modifier.width(1.dp).height(32.dp).background(BorderSubtle))
+                // Badge 3 — Chiffrement
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Lock, contentDescription = null,
+                        tint     = OrangeBrand,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text("AES-256 Bits", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Footer Links
+        Row(
+            modifier              = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment     = Alignment.CenterVertically
+        ) {
             Text(
-                text = "Conditions d'utilisation",
-                style = MaterialTheme.typography.labelLarge,
-                color = OrangeBrand,
-                fontWeight = FontWeight.Bold,
+                text      = "Aide",
+                style     = MaterialTheme.typography.labelLarge,
+                color     = OrangeBrand,
+                modifier  = Modifier.clickable { viewModel.navigateTo(Screen.HELP) }
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Box(modifier = Modifier.size(3.dp).clip(CircleShape).background(BorderSubtle))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text     = "Conditions d'utilisation",
+                style    = MaterialTheme.typography.labelLarge,
+                color    = OrangeBrand,
                 modifier = Modifier.clickable { }
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "© 2026 ÉLÉPHANT BOURSE • CÔTE D'IVOIRE",
+            text  = "© 2026 ÉLÉPHANT BOURSE — CÔTE D'IVOIRE",
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            letterSpacing = 0.5.sp
+            color = TextMuted.copy(alpha = 0.7f),
+            letterSpacing = 0.8.sp
         )
-    }
+    } // end Column
+    } // end Box (gradient background)
 }
+
+
 
 // 2. ONBOARDING SCREEN
 @Composable
@@ -1638,296 +1763,440 @@ fun DashboardScreen(viewModel: BourseViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // App top header
+        // ── APP TOP HEADER ──────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier              = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment     = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Avatar gradient
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
-                        .background(OrangeBrand.copy(alpha = 0.12f)),
+                        .background(Brush.linearGradient(listOf(OrangeBrand, OrangeDeep))),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Person, contentDescription = null, tint = OrangeBrand)
+                    Text(
+                        text       = if (userProfile?.firstName?.isNotBlank() == true)
+                                         userProfile!!.firstName.take(1).uppercase()
+                                     else "I",
+                        color      = Color.White,
+                        fontSize   = 18.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 }
                 Column {
-                    val displayName = if (userProfile != null && userProfile!!.firstName.isNotBlank()) {
-                        "Bonjour, ${userProfile!!.firstName}"
-                    } else {
-                        "Bonjour, Investisseur"
+                    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                    val greeting = when {
+                        hour < 12 -> "Bonjour"
+                        hour < 18 -> "Bon après-midi"
+                        else      -> "Bonsoir"
                     }
+                    val displayName = if (userProfile?.firstName?.isNotBlank() == true)
+                        "$greeting, ${userProfile!!.firstName} 👋"
+                    else "$greeting, Investisseur 👋"
+
                     Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text       = displayName,
+                        style      = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color      = TextPrimary
                     )
-                    Text("Propulsez votre avenir financier.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Marché BRVM • Ouvert",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = GainGreen
+                    )
                 }
             }
 
-            IconButton(
-                onClick = {
-                    android.widget.Toast.makeText(context, "Aucune nouvelle notification", android.widget.Toast.LENGTH_SHORT).show()
-                },
+            // Notification bell
+            Box(
                 modifier = Modifier
+                    .size(44.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .background(SurfaceCard2)
+                    .border(1.dp, BorderSubtle, CircleShape)
+                    .clickable {
+                        android.widget.Toast.makeText(context, "Aucune nouvelle notification", android.widget.Toast.LENGTH_SHORT).show()
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = "Notifications",
+                    tint               = TextSecondary,
+                    modifier           = Modifier.size(22.dp)
+                )
             }
         }
 
-        // Bourse branding tag
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .clip(RoundedCornerShape(100.dp))
-                .background(ForestGreen.copy(alpha = 0.12f))
-                .padding(horizontal = 16.dp, vertical = 6.dp)
-        ) {
-            Text("BOURSE HORIZON", color = ForestGreen, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-        }
-
-        // Lock Banner if not verified
+        // ── KYC Banner (si non vérifié) ───────────────────────
         val isVerified = userProfile != null && userProfile!!.kycStep >= 5
         if (!isVerified) {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = OrangeBrand.copy(alpha = 0.08f)),
-                border = BorderStroke(1.5.dp, OrangeBrand.copy(alpha = 0.4f)),
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.navigateTo(Screen.ONBOARDING) },
-                shape = RoundedCornerShape(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Brush.horizontalGradient(listOf(OrangeBrand.copy(alpha = 0.15f), OrangeDeep.copy(alpha = 0.10f))))
+                    .border(1.dp, OrangeBrand.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                    .clickable { viewModel.navigateTo(Screen.ONBOARDING) }
+                    .padding(16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(OrangeBrand.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(OrangeBrand.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Assignment, contentDescription = null, tint = OrangeBrand)
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Ouverture de Compte SGI BRVM à distance",
-                                fontWeight = FontWeight.Bold,
-                                color = OrangeBrand,
-                                fontSize = 15.sp
-                            )
-                            Text(
-                                "Ouvrez votre compte titres auprès d'une SGI agréée depuis chez vous.",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Icon(Icons.Default.Assignment, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(22.dp))
                     }
-
-                    HorizontalDivider(color = OrangeBrand.copy(alpha = 0.2f))
-
-                    Text("Éléments du dossier (100% en ligne, sans RIB) :", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
-                        Text("Identité, Profession & WhatsApp", fontSize = 11.sp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Complétez votre dossier SGI",
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = OrangeBrand,
+                            fontSize   = 14.sp
+                        )
+                        Text(
+                            "CNI, selfie, justificatif — 100% en ligne",
+                            fontSize = 11.sp,
+                            color    = TextSecondary
+                        )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
-                        Text("Pièce d'Identité (CNI / Passeport)", fontSize = 11.sp)
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
-                        Text("Justificatif de domicile (CIE, SODECI)", fontSize = 11.sp)
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
-                        Text("Signature numérique du Contrat SGI", fontSize = 11.sp)
-                    }
-
-                    Button(
-                        onClick = { viewModel.navigateTo(Screen.ONBOARDING) },
-                        modifier = Modifier.fillMaxWidth().height(42.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text("Compléter mon dossier SGI", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
+                    Icon(
+                        Icons.Default.ArrowForward,
+                        contentDescription = null,
+                        tint               = OrangeBrand,
+                        modifier           = Modifier.size(18.dp)
+                    )
                 }
             }
         }
 
-        // Main Portfolio Bento Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, GrayBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "SOLDE TOTAL ESTIMÉ",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 1.sp
-                )
-
-                val netValue = (userProfile?.portfolioValue ?: 0.0) + (userProfile?.cashBalance ?: 0.0)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = netValue.formatFcfa().substringBefore(" FCFA"),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = DarkOnBackground,
-                        fontSize = 32.sp
+        // ── HERO CARD — SOLDE TOTAL ────────────────────────────
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    Brush.linearGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color(0xFF0B1C30),
+                            0.6f to Color(0xFF142038),
+                            1.0f to Color(0xFF1A2A4A)
+                        ),
+                        start = Offset(0f, 0f),
+                        end   = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                     )
-                    Text("FCFA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                )
+                .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+        ) {
+            // Accent décoratif orange en bas à droite
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 40.dp, y = 40.dp)
+                    .clip(CircleShape)
+                    .background(OrangeBrand.copy(alpha = 0.08f))
+            )
+
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Label
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(GainGreen)
+                    )
+                    Text(
+                        text          = "PORTEFEUILLE TOTAL",
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = TextSecondary,
+                        letterSpacing = 1.5.sp
+                    )
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Montant principal
+                val netValue = (userProfile?.portfolioValue ?: 0.0) + (userProfile?.cashBalance ?: 0.0)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(100.dp))
-                            .background(ForestGreen.copy(alpha = 0.15f))
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment     = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text          = netValue.formatFcfa().substringBefore(" FCFA"),
+                            fontFamily    = MonoFamily,
+                            fontWeight    = FontWeight.ExtraBold,
+                            fontSize      = 34.sp,
+                            color         = TextPrimary,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            text      = "FCFA",
+                            style     = MaterialTheme.typography.titleSmall,
+                            color     = TextSecondary,
+                            modifier  = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
+
+                    // Variation
+                    Row(
+                        modifier              = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(GainGreenBg)
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment     = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(Icons.Default.ArrowUpward, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(14.dp))
-                        Text("+2.5% (Aujourd'hui)", style = MaterialTheme.typography.labelSmall, color = ForestGreen, fontWeight = FontWeight.Bold)
+                        Icon(
+                            Icons.Default.ArrowUpward,
+                            contentDescription = null,
+                            tint               = GainGreen,
+                            modifier           = Modifier.size(12.dp)
+                        )
+                        Text(
+                            "+2.5% aujourd'hui",
+                            style      = MaterialTheme.typography.labelSmall,
+                            color      = GainGreen,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = BorderSubtle)
+
+                // Stats mini-row + CTA
+                Row(
+                    modifier              = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment     = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            "ACTIONS",
+                            style         = MaterialTheme.typography.labelSmall,
+                            color         = TextMuted,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            "${holdings.size} Sociétés",
+                            fontWeight = FontWeight.ExtraBold,
+                            color      = TextPrimary,
+                            fontSize   = 16.sp
+                        )
+                    }
+                    Column {
+                        Text(
+                            "LIQUIDITÉS",
+                            style         = MaterialTheme.typography.labelSmall,
+                            color         = TextMuted,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            "${(userProfile?.cashBalance ?: 0.0).formatFcfa()}",
+                            fontWeight    = FontWeight.ExtraBold,
+                            color         = TextPrimary,
+                            fontSize      = 14.sp,
+                            fontFamily    = MonoFamily
+                        )
                     }
 
-                    Button(
-                        onClick = { viewModel.navigateTo(Screen.MARKET) },
-                        colors = ButtonDefaults.buttonColors(containerColor = if (isVerified) GoldPremium else Color.Gray),
-                        enabled = isVerified,
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.testTag("place_order_button")
+                    // CTA Placer un ordre
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (isVerified)
+                                    Brush.horizontalGradient(listOf(OrangeBrand, OrangeDeep))
+                                else
+                                    Brush.horizontalGradient(listOf(SurfaceElevated, SurfaceElevated))
+                            )
+                            .clickable(enabled = isVerified) { viewModel.navigateTo(Screen.MARKET) }
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                            .testTag("place_order_button"),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Placer un ordre", fontWeight = FontWeight.Bold)
+                        Text(
+                            text       = "Placer un ordre",
+                            color      = if (isVerified) Color.White else TextMuted,
+                            fontWeight = FontWeight.Bold,
+                            fontSize   = 13.sp
+                        )
                     }
                 }
             }
         }
 
-        // Stats card layout
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Card(
+
+        // ── STATS CARDS ───────────────────────────────────────
+        Row(
+            modifier              = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Card Actions Détenues
+            Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { viewModel.navigateTo(Screen.PORTFOLIO) },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, GrayBorder)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceCard)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                    .clickable { viewModel.navigateTo(Screen.PORTFOLIO) }
+                    .padding(16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("ACTIONS DÉTENUES", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("${holdings.size} Sociétés", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(OrangeBrandLight),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.AccountBalanceWallet,
+                            contentDescription = null,
+                            tint     = OrangeBrand,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Text(
+                        "ACTIONS",
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = TextMuted,
+                        letterSpacing = 0.8.sp
+                    )
+                    Text(
+                        "${holdings.size} Sociétés",
+                        fontWeight = FontWeight.ExtraBold,
+                        color      = TextPrimary,
+                        fontSize   = 16.sp
+                    )
                 }
             }
 
-            Card(
-                modifier = Modifier.weight(1f),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, GrayBorder)
+            // Card Dividendes
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceCard)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("DIVIDENDES REÇUS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("45 800 FCFA", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = ForestGreen)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(GainGreenBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.TrendingUp,
+                            contentDescription = null,
+                            tint     = GainGreen,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Text(
+                        "DIVIDENDES",
+                        style         = MaterialTheme.typography.labelSmall,
+                        color         = TextMuted,
+                        letterSpacing = 0.8.sp
+                    )
+                    Text(
+                        "45 800 FCFA",
+                        fontWeight = FontWeight.ExtraBold,
+                        color      = GainGreen,
+                        fontSize   = 14.sp,
+                        fontFamily = MonoFamily
+                    )
                 }
             }
         }
 
-        // Grid Menu Options
+        // ── ACTIONS RAPIDES ───────────────────────────────────
+        Text(
+            text          = "ACTIONS RAPIDES",
+            style         = MaterialTheme.typography.labelSmall,
+            color         = TextMuted,
+            letterSpacing = 1.sp,
+            modifier      = Modifier.padding(top = 4.dp)
+        )
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier              = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, GrayBorder, RoundedCornerShape(12.dp))
-                    .clickable { viewModel.navigateTo(Screen.MARKET) }
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Acheter", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, GrayBorder, RoundedCornerShape(12.dp))
-                    .clickable { viewModel.navigateTo(Screen.PORTFOLIO) }
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(Icons.Default.ShowChart, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Suivre", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, GrayBorder, RoundedCornerShape(12.dp))
-                    .clickable { viewModel.navigateTo(Screen.HISTORY) }
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = GoldPremium, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Historique", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, GrayBorder, RoundedCornerShape(12.dp))
-                    .clickable { viewModel.navigateTo(Screen.HELP) }
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(Icons.Default.School, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text("Académie", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            // Action — Acheter
+            data class QuickAction(val icon: ImageVector, val label: String, val bg: Color, val tint: Color, val screen: Screen?)
+            val actions = listOf(
+                QuickAction(Icons.Default.ShoppingCart,  "Acheter",     OrangeBrandLight,  OrangeBrand, Screen.MARKET),
+                QuickAction(Icons.Default.ShowChart,     "Suivre",      GainGreenBg,       GainGreen,   Screen.PORTFOLIO),
+                QuickAction(Icons.Default.ReceiptLong,   "Historique",  PendingAmberBg,    PendingAmber, Screen.HISTORY),
+                QuickAction(Icons.Default.School,        "Académie",    OrangeBrandLight,  OrangeBrand, Screen.HELP)
+            )
+            actions.forEach { action ->
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(SurfaceCard)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                        .clickable { if (action.screen != null) viewModel.navigateTo(action.screen) }
+                        .padding(vertical = 14.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(action.bg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            action.icon,
+                            contentDescription = null,
+                            tint     = action.tint,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Text(
+                        action.label,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize   = 11.sp,
+                        color      = TextSecondary
+                    )
+                }
             }
         }
 
-        // Did you know block (Académie / Pédagogie)
+
+        // ── BLOC PÉDAGOGIQUE ─────────────────────────────────
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-            border = BorderStroke(1.dp, GrayBorder)
+            colors   = CardDefaults.cardColors(containerColor = SurfaceCard),
+            border   = BorderStroke(1.dp, OrangeBrand.copy(alpha = 0.2f)),
+            shape    = RoundedCornerShape(16.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
