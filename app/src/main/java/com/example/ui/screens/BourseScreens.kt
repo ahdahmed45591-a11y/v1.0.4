@@ -57,6 +57,8 @@ fun baouTextFieldColors() = OutlinedTextFieldDefaults.colors(
     unfocusedBorderColor = BorderMedium,
     focusedLabelColor = OrangeBrand,
     unfocusedLabelColor = TextSecondary,
+    focusedPlaceholderColor = TextMuted,
+    unfocusedPlaceholderColor = TextMuted,
     cursorColor = OrangeBrand
 )
 
