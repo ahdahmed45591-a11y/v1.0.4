@@ -987,7 +987,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                 Text(
                     text = "${(progressValue * 100).toInt()}%",
                     style = MaterialTheme.typography.labelLarge,
-                    color = ForestGreen,
+                    color = GainGreen,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -997,7 +997,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = ForestGreen,
+                color = GainGreen,
                 trackColor = GrayBorder
             )
         }
@@ -1218,7 +1218,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(if (identityRecto?.contains("✅") == true) ForestGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                .background(if (identityRecto?.contains("✅") == true) GainGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                 .clickable {
                                     activeDocTarget = "RECTO"
                                     try {
@@ -1235,14 +1235,14 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(ForestGreen.copy(alpha = 0.12f)),
+                                    .background(GainGreen.copy(alpha = 0.12f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Badge, contentDescription = null, tint = ForestGreen)
+                                Icon(Icons.Default.Badge, contentDescription = null, tint = GainGreen)
                             }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Pièce d'Identité (RECTO)", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(identityRecto ?: "Appuyer pour prendre la photo du Recto (CNI/Passeport)", fontSize = 12.sp, color = if (identityRecto?.contains("✅") == true) ForestGreen else MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(identityRecto ?: "Appuyer pour prendre la photo du Recto (CNI/Passeport)", fontSize = 12.sp, color = if (identityRecto?.contains("✅") == true) GainGreen else MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = OrangeBrand)
                         }
@@ -1252,7 +1252,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(if (identityVerso?.contains("✅") == true) ForestGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                .background(if (identityVerso?.contains("✅") == true) GainGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                 .clickable {
                                     activeDocTarget = "VERSO"
                                     try {
@@ -1269,14 +1269,14 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(ForestGreen.copy(alpha = 0.12f)),
+                                    .background(GainGreen.copy(alpha = 0.12f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Badge, contentDescription = null, tint = ForestGreen)
+                                Icon(Icons.Default.Badge, contentDescription = null, tint = GainGreen)
                             }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Pièce d'Identité (VERSO)", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(identityVerso ?: "Appuyer pour prendre la photo du Verso de la CNI", fontSize = 12.sp, color = if (identityVerso?.contains("✅") == true) ForestGreen else MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(identityVerso ?: "Appuyer pour prendre la photo du Verso de la CNI", fontSize = 12.sp, color = if (identityVerso?.contains("✅") == true) GainGreen else MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = OrangeBrand)
                         }
@@ -1286,7 +1286,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(if (selfiePhoto?.contains("✅") == true) ForestGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                .background(if (selfiePhoto?.contains("✅") == true) GainGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                 .clickable {
                                     activeDocTarget = "SELFIE"
                                     try {
@@ -1303,14 +1303,14 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(ForestGreen.copy(alpha = 0.12f)),
+                                    .background(GainGreen.copy(alpha = 0.12f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Face, contentDescription = null, tint = ForestGreen)
+                                Icon(Icons.Default.Face, contentDescription = null, tint = GainGreen)
                             }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Reconnaissance Faciale (Selfie)", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(selfiePhoto ?: "Appuyer pour ouvrir la caméra et faire un selfie", fontSize = 12.sp, color = if (selfiePhoto?.contains("✅") == true) ForestGreen else MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(selfiePhoto ?: "Appuyer pour ouvrir la caméra et faire un selfie", fontSize = 12.sp, color = if (selfiePhoto?.contains("✅") == true) GainGreen else MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Icon(Icons.Default.CameraFront, contentDescription = null, tint = OrangeBrand)
                         }
@@ -1384,8 +1384,8 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                                 .fillMaxWidth()
                                 .height(160.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(2.dp, if (proofDocStatus?.contains("✅") == true) ForestGreen else OrangeBrand.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                                .background(if (proofDocStatus?.contains("✅") == true) ForestGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                                .border(2.dp, if (proofDocStatus?.contains("✅") == true) GainGreen else OrangeBrand.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                                .background(if (proofDocStatus?.contains("✅") == true) GainGreen.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
                                 .clickable {
                                     activeDocTarget = "PROOF"
                                     try {
@@ -1399,7 +1399,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Default.UploadFile, contentDescription = null, tint = if (proofDocStatus?.contains("✅") == true) ForestGreen else OrangeBrand, modifier = Modifier.size(44.dp))
+                                Icon(Icons.Default.UploadFile, contentDescription = null, tint = if (proofDocStatus?.contains("✅") == true) GainGreen else OrangeBrand, modifier = Modifier.size(44.dp))
                                 Text(proofDocStatus ?: "Uploader mon document (CIE, SODECI)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 Text("Appuyez pour ouvrir vos fichiers et sélectionner la facture PDF / Photo", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
@@ -1407,11 +1407,11 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = GainGreen, modifier = Modifier.size(16.dp))
                                 Text("Facture d'électricité (CIE) ou d'eau (SODECI)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = GainGreen, modifier = Modifier.size(16.dp))
                                 Text("Le nom de famille doit correspondre à votre ID", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
@@ -1432,7 +1432,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                                     .weight(2f)
                                     .height(50.dp)
                                     .testTag("onboarding_submit"),
-                                colors = ButtonDefaults.buttonColors(containerColor = ForestGreen)
+                                colors = ButtonDefaults.buttonColors(containerColor = GainGreen)
                             ) {
                                 Text("Soumettre mon dossier", fontWeight = FontWeight.Bold)
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -1506,7 +1506,7 @@ fun SignatureScreen(viewModel: BourseViewModel) {
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Dernière étape : Signature du contrat", style = MaterialTheme.typography.labelMedium, color = OrangeBrand, fontWeight = FontWeight.Bold)
-                Text("95%", style = MaterialTheme.typography.labelMedium, color = ForestGreen, fontWeight = FontWeight.Bold)
+                Text("95%", style = MaterialTheme.typography.labelMedium, color = GainGreen, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
                 progress = { 0.95f },
@@ -1514,7 +1514,7 @@ fun SignatureScreen(viewModel: BourseViewModel) {
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = ForestGreen,
+                color = GainGreen,
                 trackColor = GrayBorder
             )
         }
@@ -1743,7 +1743,7 @@ trailer << /Root 1 0 R >> %%EOF
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Icon(Icons.Default.Download, contentDescription = null, tint = ForestGreen)
+                Icon(Icons.Default.Download, contentDescription = null, tint = GainGreen)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Télécharger le contrat (PDF)", fontWeight = FontWeight.Bold)
             }
@@ -2213,7 +2213,7 @@ fun DashboardScreen(viewModel: BourseViewModel) {
                     }
                     Text(
                         text = "Académie",
-                        color = ForestGreen,
+                        color = GainGreen,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         textDecoration = TextDecoration.Underline,
@@ -2236,7 +2236,7 @@ fun DashboardScreen(viewModel: BourseViewModel) {
                         .fillMaxWidth()
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
-                    color = ForestGreen,
+                    color = GainGreen,
                     trackColor = GrayBorder
                 )
             }
@@ -2399,7 +2399,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
 
                         Column(horizontalAlignment = Alignment.End) {
                             Text(item.price.formatFcfa(), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                            val color = if (item.isGaining) ForestGreen else RedLoss
+                            val color = if (item.isGaining) GainGreen else LossRed
                             val prefix = if (item.isGaining) "+" else ""
                             Text("$prefix${item.changePercent}%", color = color, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
@@ -2437,7 +2437,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(stock.price.formatFcfa(), fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.titleLarge)
-                    val color = if (stock.isGaining) ForestGreen else RedLoss
+                    val color = if (stock.isGaining) GainGreen else LossRed
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(
                             imageVector = if (stock.isGaining) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
@@ -2467,10 +2467,10 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(ForestGreen.copy(alpha = 0.15f))
+                            .background(GainGreen.copy(alpha = 0.15f))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text("DIRECT", color = ForestGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text("DIRECT", color = GainGreen, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -2478,7 +2478,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp),
-                    color = if (stock.isGaining) ForestGreen else RedLoss,
+                    color = if (stock.isGaining) GainGreen else LossRed,
                     isGaining = stock.isGaining
                 )
             }
@@ -2578,7 +2578,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
             }
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = GainGreen, modifier = Modifier.size(16.dp))
                 val availCash = userProfile?.cashBalance ?: 125000.0
                 Text(
                     text = "Solde disponible : ${availCash.formatFcfa()}",
@@ -2594,7 +2594,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     .fillMaxWidth()
                     .height(54.dp)
                     .testTag("confirm_order_button"),
-                colors = ButtonDefaults.buttonColors(containerColor = if (isVerified) ForestGreen else Color.Gray),
+                colors = ButtonDefaults.buttonColors(containerColor = if (isVerified) GainGreen else Color.Gray),
                 enabled = isVerified,
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -3151,11 +3151,11 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                     if (qtyToSell > 0) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = ForestGreen.copy(alpha = 0.08f))
+                            colors = CardDefaults.cardColors(containerColor = GainGreen.copy(alpha = 0.08f))
                         ) {
                             Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("Revenu estimé de la vente", fontSize = 11.sp, color = ForestGreen, fontWeight = FontWeight.Bold)
-                                Text(estRevenue.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = ForestGreen)
+                                Text("Revenu estimé de la vente", fontSize = 11.sp, color = GainGreen, fontWeight = FontWeight.Bold)
+                                Text(estRevenue.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = GainGreen)
                             }
                         }
                     }
@@ -3340,7 +3340,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Frais de transaction (0%)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("0 FCFA", fontWeight = FontWeight.Bold, color = ForestGreen)
+                    Text("0 FCFA", fontWeight = FontWeight.Bold, color = GainGreen)
                 }
                 HorizontalDivider(color = GrayBorder)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -3476,7 +3476,7 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                     val colorLeftBorder = when (tx.status) {
                         "ANNULÉ" -> GrayBorder
                         "EN ATTENTE" -> OrangeBrand
-                        else -> if (tx.type == "DEPOSIT" || tx.type == "SELL") ForestGreen else RedLoss
+                        else -> if (tx.type == "DEPOSIT" || tx.type == "SELL") GainGreen else LossRed
                     }
 
                     Card(
@@ -3509,9 +3509,9 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                                         .clip(CircleShape)
                                         .background(
                                             when (tx.type) {
-                                                "DEPOSIT" -> ForestGreen.copy(alpha = 0.12f)
-                                                "SELL" -> ForestGreen.copy(alpha = 0.12f)
-                                                else -> RedLoss.copy(alpha = 0.12f)
+                                                "DEPOSIT" -> GainGreen.copy(alpha = 0.12f)
+                                                "SELL" -> GainGreen.copy(alpha = 0.12f)
+                                                else -> LossRed.copy(alpha = 0.12f)
                                             }
                                         ),
                                     contentAlignment = Alignment.Center
@@ -3523,7 +3523,7 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                                             else -> Icons.Default.ShoppingCart
                                         },
                                         contentDescription = null,
-                                        tint = if (tx.type == "DEPOSIT" || tx.type == "SELL") ForestGreen else RedLoss,
+                                        tint = if (tx.type == "DEPOSIT" || tx.type == "SELL") GainGreen else LossRed,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -3537,9 +3537,9 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                                                 .clip(RoundedCornerShape(100.dp))
                                                 .background(
                                                     when (tx.status) {
-                                                        "ANNULÉ" -> RedLoss.copy(alpha = 0.15f)
+                                                        "ANNULÉ" -> LossRed.copy(alpha = 0.15f)
                                                         "EN ATTENTE" -> OrangeBrand.copy(alpha = 0.15f)
-                                                        else -> ForestGreen.copy(alpha = 0.15f)
+                                                        else -> GainGreen.copy(alpha = 0.15f)
                                                     }
                                                 )
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -3549,9 +3549,9 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                                                 fontSize = 8.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = when (tx.status) {
-                                                    "ANNULÉ" -> RedLoss
+                                                    "ANNULÉ" -> LossRed
                                                     "EN ATTENTE" -> OrangeBrand
-                                                    else -> ForestGreen
+                                                    else -> GainGreen
                                                 }
                                             )
                                         }
@@ -3565,7 +3565,7 @@ fun HistoryScreen(viewModel: BourseViewModel) {
                                 Text(
                                     text = textVal,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = if (tx.type == "DEPOSIT" || tx.type == "SELL") ForestGreen else DarkOnBackground,
+                                    color = if (tx.type == "DEPOSIT" || tx.type == "SELL") GainGreen else DarkOnBackground,
                                     fontSize = 14.sp
                                 )
                                 if (tx.sharesQty > 0) {
@@ -3659,8 +3659,8 @@ fun HelpScreen(viewModel: BourseViewModel) {
                 border = BorderStroke(1.dp, GrayBorder)
             ) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(ForestGreen.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(18.dp))
+                    Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(GainGreen.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = GainGreen, modifier = Modifier.size(18.dp))
                     }
                     Text("Fonds", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Text("Dépôts & Retraits", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
