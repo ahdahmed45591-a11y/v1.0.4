@@ -1034,7 +1034,6 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.firstNameInput.value = it },
                             label = { Text("Prénom(s)") },
                             placeholder = { Text("ex: Jean-Marc") },
-                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("firstname_input"),
@@ -1047,7 +1046,6 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.lastNameInput.value = it },
                             label = { Text("Nom de famille") },
                             placeholder = { Text("ex: Kouassi") },
-                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("lastname_input"),
@@ -1060,7 +1058,6 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.birthDateInput.value = it },
                             label = { Text("Date de naissance") },
                             placeholder = { Text("JJ/MM/AAAA") },
-                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("birthdate_input"),
@@ -1074,7 +1071,6 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.professionInput.value = it },
                             label = { Text("Profession / Secteur d'activité") },
                             placeholder = { Text("ex: Ingénieur, Commerçant...") },
-                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("profession_input"),
@@ -1087,7 +1083,6 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.residenceInput.value = it },
                             label = { Text("Ville & Pays de résidence") },
                             placeholder = { Text("ex: Abidjan, Côte d'Ivoire") },
-                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("residence_input"),
@@ -2323,7 +2318,6 @@ fun MarketScreen(viewModel: BourseViewModel) {
                 },
                 placeholder = { Text("Rechercher une action (ex: SNTS, ORAC...)") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
-                
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -2550,7 +2544,6 @@ fun MarketScreen(viewModel: BourseViewModel) {
                         value = limitPriceString,
                         onValueChange = { viewModel.orderLimitPrice.value = it },
                         label = { Text("Prix Limite (FCFA)") },
-                        
                         modifier = Modifier
                             .weight(1f)
                             .testTag("order_limit_price_input"),
@@ -2927,7 +2920,6 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                             sellQtyInput = it
                             errorMsg = ""
                         },
-                        
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Quantité à vendre") },
                         placeholder = { Text("ex: 5") },
@@ -3226,7 +3218,6 @@ fun HistoryScreen(viewModel: BourseViewModel) {
             onValueChange = { searchQuery = it },
             placeholder = { Text("Rechercher une entreprise ou référence...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
-            
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true
@@ -4039,7 +4030,6 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             value = subjectText,
                             onValueChange = { viewModel.supportSubjectInput.value = it },
                             label = { Text("Sujet") },
-                            
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -4049,7 +4039,6 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             value = messageText,
                             onValueChange = { viewModel.supportMessageInput.value = it },
                             label = { Text("Votre message") },
-                            
                             modifier = Modifier.fillMaxWidth().height(120.dp),
                             maxLines = 5,
                             shape = RoundedCornerShape(12.dp)
