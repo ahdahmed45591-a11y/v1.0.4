@@ -383,7 +383,6 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         onValueChange = { tempUrl = it },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse du serveur") },
-                        
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
@@ -516,7 +515,6 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             onValueChange = { firstNameInputText = it; errorMsg = "" },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Prénom") },
-                            
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = OrangeBrand) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -528,7 +526,6 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         onValueChange = { emailInput = it; errorMsg = "" },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse e-mail") },
-                        
                         leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = OrangeBrand) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
@@ -545,7 +542,6 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Code PIN secret (au moins 6 chiffres)") },
-                        
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -576,7 +572,6 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Confirmer le Code PIN (au moins 6 chiffres)") },
-                            
                             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                             visualTransformation = if (passwordVisible)
                                 androidx.compose.ui.text.input.VisualTransformation.None
@@ -1666,7 +1661,6 @@ fun SignatureScreen(viewModel: BourseViewModel) {
                                             viewModel.smsOtpCode.value = newList
                                         }
                                     },
-                                    
                                     modifier = Modifier
                                         .size(44.dp)
                                         .testTag("otp_digit_$i"),
