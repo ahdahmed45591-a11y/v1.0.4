@@ -383,7 +383,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         onValueChange = { tempUrl = it },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse du serveur") },
-                        textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                        
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
@@ -516,7 +516,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             onValueChange = { firstNameInputText = it; errorMsg = "" },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Prénom") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = OrangeBrand) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -528,7 +528,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         onValueChange = { emailInput = it; errorMsg = "" },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse e-mail") },
-                        textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                        
                         leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = OrangeBrand) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
@@ -545,7 +545,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Code PIN secret (au moins 6 chiffres)") },
-                        textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                        
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -576,7 +576,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Confirmer le Code PIN (au moins 6 chiffres)") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                             visualTransformation = if (passwordVisible)
                                 androidx.compose.ui.text.input.VisualTransformation.None
@@ -1039,7 +1039,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.firstNameInput.value = it },
                             label = { Text("Prénom(s)") },
                             placeholder = { Text("ex: Jean-Marc") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("firstname_input"),
@@ -1052,7 +1052,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.lastNameInput.value = it },
                             label = { Text("Nom de famille") },
                             placeholder = { Text("ex: Kouassi") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("lastname_input"),
@@ -1065,7 +1065,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.birthDateInput.value = it },
                             label = { Text("Date de naissance") },
                             placeholder = { Text("JJ/MM/AAAA") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("birthdate_input"),
@@ -1079,7 +1079,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.professionInput.value = it },
                             label = { Text("Profession / Secteur d'activité") },
                             placeholder = { Text("ex: Ingénieur, Commerçant...") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("profession_input"),
@@ -1092,7 +1092,7 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.residenceInput.value = it },
                             label = { Text("Ville & Pays de résidence") },
                             placeholder = { Text("ex: Abidjan, Côte d'Ivoire") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("residence_input"),
@@ -1666,7 +1666,7 @@ fun SignatureScreen(viewModel: BourseViewModel) {
                                             viewModel.smsOtpCode.value = newList
                                         }
                                     },
-                                    textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                                    
                                     modifier = Modifier
                                         .size(44.dp)
                                         .testTag("otp_digit_$i"),
@@ -2329,7 +2329,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
                 },
                 placeholder = { Text("Rechercher une action (ex: SNTS, ORAC...)") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
-                textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -2542,7 +2542,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     value = qtyString,
                     onValueChange = { viewModel.orderQuantity.value = it },
                     label = { Text("Unités (Quantité)") },
-                    textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                    
                     modifier = Modifier
                         .weight(1f)
                         .testTag("order_qty_input"),
@@ -2556,7 +2556,7 @@ fun MarketScreen(viewModel: BourseViewModel) {
                         value = limitPriceString,
                         onValueChange = { viewModel.orderLimitPrice.value = it },
                         label = { Text("Prix Limite (FCFA)") },
-                        textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                        
                         modifier = Modifier
                             .weight(1f)
                             .testTag("order_limit_price_input"),
@@ -2933,7 +2933,7 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                             sellQtyInput = it
                             errorMsg = ""
                         },
-                        textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                        
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Quantité à vendre") },
                         placeholder = { Text("ex: 5") },
@@ -3038,7 +3038,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
             OutlinedTextField(
                 value = amountInput,
                 onValueChange = { viewModel.depositAmountInput.value = it },
-                textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("deposit_amount_field"),
@@ -3232,7 +3232,7 @@ fun HistoryScreen(viewModel: BourseViewModel) {
             onValueChange = { searchQuery = it },
             placeholder = { Text("Rechercher une entreprise ou référence...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
-            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+            
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true
@@ -4045,7 +4045,7 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             value = subjectText,
                             onValueChange = { viewModel.supportSubjectInput.value = it },
                             label = { Text("Sujet") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -4055,7 +4055,7 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             value = messageText,
                             onValueChange = { viewModel.supportMessageInput.value = it },
                             label = { Text("Votre message") },
-                            textStyle = LocalTextStyle.current.copy(color = TextPrimary), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = OrangeBrand),
+                            
                             modifier = Modifier.fillMaxWidth().height(120.dp),
                             maxLines = 5,
                             shape = RoundedCornerShape(12.dp)
