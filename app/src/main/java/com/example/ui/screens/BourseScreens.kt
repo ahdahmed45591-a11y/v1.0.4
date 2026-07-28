@@ -47,9 +47,24 @@ import com.example.ui.theme.*
 import com.example.viewmodel.BourseViewModel
 import com.example.viewmodel.Screen
 import com.example.viewmodel.StockWatchItem
-import java.text.NumberFormat
-import java.util.Locale
-
+@Composable
+fun baouTextFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor           = TextPrimary,
+    unfocusedTextColor         = TextPrimary,
+    focusedContainerColor       = SurfaceCard2,
+    unfocusedContainerColor     = SurfaceCard,
+    focusedBorderColor         = OrangeBrand,
+    unfocusedBorderColor       = BorderMedium,
+    focusedLabelColor          = OrangeBrand,
+    unfocusedLabelColor        = TextSecondary,
+    focusedLeadingIconColor    = OrangeBrand,
+    unfocusedLeadingIconColor  = TextSecondary,
+    focusedTrailingIconColor   = OrangeBrand,
+    unfocusedTrailingIconColor = TextSecondary,
+    cursorColor                = OrangeBrand,
+    focusedPlaceholderColor    = TextMuted,
+    unfocusedPlaceholderColor  = TextMuted
+)
 
 fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, pdfContent: String): Boolean {
     return try {
@@ -353,7 +368,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = SurfaceCard,
                 tonalElevation = 6.dp,
                 border = BorderStroke(1.dp, BorderSubtle)
@@ -369,27 +384,28 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         text = "Configuration Serveur",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F1F1F)
+                        color = TextPrimary
                     )
-                    
+
                     Text(
                         text = "Saisissez l'adresse de votre backend local ou hébergé en ligne pour communiquer.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF444746),
+                        color = TextSecondary,
                         textAlign = TextAlign.Center
                     )
-                    
+
                     var tempUrl by remember { mutableStateOf(serverUrlInput) }
-                    
+
                     OutlinedTextField(
                         value = tempUrl,
                         onValueChange = { tempUrl = it },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse du serveur") },
+                        colors = baouTextFieldColors(),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -397,9 +413,11 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         OutlinedButton(
                             onClick = { viewModel.showServerUrlSettings.value = false },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, BorderMedium),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Text("Annuler")
+                            Text("Annuler", color = TextSecondary)
                         }
                         Button(
                             onClick = {
@@ -410,7 +428,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Enregistrer")
+                            Text("Enregistrer", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -437,8 +455,9 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                     .wrapContentHeight()
                     .padding(horizontal = 8.dp),
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
-                tonalElevation = 6.dp
+                color = SurfaceCard,
+                tonalElevation = 6.dp,
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
                 Column(
                     modifier = Modifier
@@ -452,7 +471,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         modifier = Modifier
                             .size(56.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFFF8200)),
+                            .background(OrangeBrand),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("B", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
@@ -462,23 +481,24 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFF1F1F1))
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceCard2)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
                     ) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (!isRegisterMode) Color(0xFFFF8200) else Color.Transparent)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (!isRegisterMode) OrangeBrand else Color.Transparent)
                                 .clickable { isRegisterMode = false; errorMsg = "" },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 "Connexion",
                                 fontWeight = FontWeight.Bold,
-                                color = if (!isRegisterMode) Color.White else Color(0xFF666666),
+                                color = if (!isRegisterMode) Color.White else TextSecondary,
                                 fontSize = 14.sp
                             )
                         }
@@ -486,15 +506,15 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (isRegisterMode) Color(0xFFFF8200) else Color.Transparent)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isRegisterMode) OrangeBrand else Color.Transparent)
                                 .clickable { isRegisterMode = true; errorMsg = "" },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 "Inscription",
                                 fontWeight = FontWeight.Bold,
-                                color = if (isRegisterMode) Color.White else Color(0xFF666666),
+                                color = if (isRegisterMode) Color.White else TextSecondary,
                                 fontSize = 14.sp
                             )
                         }
@@ -504,7 +524,7 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         text = if (isRegisterMode) "Créer un compte BAOU" else "Connexion • BAOU Finance",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F1F1F),
+                        color = TextPrimary,
                         textAlign = TextAlign.Center
                     )
 
@@ -514,7 +534,8 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             onValueChange = { firstNameInputText = it; errorMsg = "" },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Prénom") },
-                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFFFF8200)) },
+                            colors = baouTextFieldColors(),
+                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = OrangeBrand) },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -525,7 +546,8 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                         onValueChange = { emailInput = it; errorMsg = "" },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Adresse e-mail") },
-                        leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = Color(0xFFFF8200)) },
+                        colors = baouTextFieldColors(),
+                        leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = OrangeBrand) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
@@ -540,14 +562,15 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(if (isRegisterMode) "Code PIN secret (au moins 6 chiffres)" else "Code PIN secret (au moins 6 chiffres)") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF8200)) },
+                        label = { Text("Code PIN secret (au moins 6 chiffres)") },
+                        colors = baouTextFieldColors(),
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = null,
-                                    tint = Color(0xFF999999)
+                                    tint = TextSecondary
                                 )
                             }
                         },
@@ -571,7 +594,8 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             },
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("Confirmer le Code PIN (au moins 6 chiffres)") },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFFF8200)) },
+                            colors = baouTextFieldColors(),
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = OrangeBrand) },
                             visualTransformation = if (passwordVisible)
                                 androidx.compose.ui.text.input.VisualTransformation.None
                             else
@@ -587,13 +611,14 @@ fun WelcomeScreen(viewModel: BourseViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFFFEDED))
+                                .background(LossRedBg)
+                                .border(1.dp, LossRed.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                                 .padding(10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.Default.Error, contentDescription = null, tint = Color(0xFFCC0000), modifier = Modifier.size(18.dp))
-                            Text(errorMsg, fontSize = 12.sp, color = Color(0xFFCC0000))
+                            Icon(Icons.Default.Error, contentDescription = null, tint = LossRed, modifier = Modifier.size(18.dp))
+                            Text(errorMsg, fontSize = 12.sp, color = LossRed)
                         }
                     }
 
@@ -1032,11 +1057,12 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.firstNameInput.value = it },
                             label = { Text("Prénom(s)") },
                             placeholder = { Text("ex: Jean-Marc") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("firstname_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         OutlinedTextField(
@@ -1044,11 +1070,12 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.lastNameInput.value = it },
                             label = { Text("Nom de famille") },
                             placeholder = { Text("ex: Kouassi") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("lastname_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         OutlinedTextField(
@@ -1056,11 +1083,12 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.birthDateInput.value = it },
                             label = { Text("Date de naissance") },
                             placeholder = { Text("JJ/MM/AAAA") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("birthdate_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(12.dp),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
 
@@ -1069,11 +1097,12 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.professionInput.value = it },
                             label = { Text("Profession / Secteur d'activité") },
                             placeholder = { Text("ex: Ingénieur, Commerçant...") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("profession_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         OutlinedTextField(
@@ -1081,11 +1110,12 @@ fun OnboardingScreen(viewModel: BourseViewModel) {
                             onValueChange = { viewModel.residenceInput.value = it },
                             label = { Text("Ville & Pays de résidence") },
                             placeholder = { Text("ex: Abidjan, Côte d'Ivoire") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("residence_input"),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         Button(
@@ -1654,12 +1684,14 @@ fun SignatureScreen(viewModel: BourseViewModel) {
                                             viewModel.smsOtpCode.value = newList
                                         }
                                     },
+                                    colors = baouTextFieldColors(),
                                     modifier = Modifier
-                                        .size(40.dp)
+                                        .size(44.dp)
                                         .testTag("otp_digit_$i"),
                                     singleLine = true,
-                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold),
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, color = TextPrimary),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    shape = RoundedCornerShape(10.dp)
                                 )
                             }
                         }
@@ -2314,10 +2346,12 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     dropdownExpanded = it.isNotBlank()
                 },
                 placeholder = { Text("Rechercher une action (ex: SNTS, ORAC...)") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
+                colors = baouTextFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
+
 
             // Dynamic dropdown results based on search query
             if (dropdownExpanded) {
@@ -2526,11 +2560,12 @@ fun MarketScreen(viewModel: BourseViewModel) {
                     value = qtyString,
                     onValueChange = { viewModel.orderQuantity.value = it },
                     label = { Text("Unités (Quantité)") },
+                    colors = baouTextFieldColors(),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("order_qty_input"),
                     singleLine = true,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -2539,11 +2574,12 @@ fun MarketScreen(viewModel: BourseViewModel) {
                         value = limitPriceString,
                         onValueChange = { viewModel.orderLimitPrice.value = it },
                         label = { Text("Prix Limite (FCFA)") },
+                        colors = baouTextFieldColors(),
                         modifier = Modifier
                             .weight(1f)
                             .testTag("order_limit_price_input"),
                         singleLine = true,
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(12.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
@@ -2888,7 +2924,8 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                     .wrapContentHeight()
                     .padding(horizontal = 8.dp),
                 shape = RoundedCornerShape(24.dp),
-                color = Color.White
+                color = SurfaceCard,
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -2899,12 +2936,12 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                         text = "Vente d'actions",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F1F1F)
+                        color = TextPrimary
                     )
                     Text(
                         text = "Combien d'actions de ${holding.companyName} (${holding.ticker}) voulez-vous vendre ? (Max : $maxShares)",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF666666),
+                        color = TextSecondary,
                         textAlign = TextAlign.Center
                     )
 
@@ -2914,6 +2951,7 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                             sellQtyInput = it
                             errorMsg = ""
                         },
+                        colors = baouTextFieldColors(),
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Quantité à vendre") },
                         placeholder = { Text("ex: 5") },
@@ -3018,11 +3056,12 @@ fun DepositScreen(viewModel: BourseViewModel) {
             OutlinedTextField(
                 value = amountInput,
                 onValueChange = { viewModel.depositAmountInput.value = it },
+                colors = baouTextFieldColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("deposit_amount_field"),
                 textStyle = MaterialTheme.typography.headlineMedium.copy(color = OrangeBrand, fontWeight = FontWeight.Bold),
-                trailingIcon = { Text("FCFA", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(end = 16.dp)) },
+                trailingIcon = { Text("FCFA", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(end = 16.dp), color = OrangeBrand) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -3210,7 +3249,8 @@ fun HistoryScreen(viewModel: BourseViewModel) {
             value = searchQuery,
             onValueChange = { searchQuery = it },
             placeholder = { Text("Rechercher une entreprise ou référence...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OrangeBrand) },
+            colors = baouTextFieldColors(),
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             singleLine = true
@@ -3594,10 +3634,11 @@ fun ProfileScreen(viewModel: BourseViewModel) {
             Text(
                 text = "Profil",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
             )
             IconButton(onClick = { }) {
-                Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Default.Settings, contentDescription = "Paramètres", tint = TextSecondary)
             }
         }
 
@@ -3618,8 +3659,8 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                     modifier = Modifier
                         .size(96.dp)
                         .clip(CircleShape)
-                        .background(OrangeBrand.copy(alpha = 0.12f))
-                        .border(3.dp, ForestGreen, CircleShape),
+                        .background(OrangeBrand.copy(alpha = 0.15f))
+                        .border(3.dp, GainGreen, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (photoUri != null) {
@@ -3643,37 +3684,42 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                         .align(Alignment.BottomEnd)
                         .clip(CircleShape)
                         .background(OrangeBrand)
-                        .border(2.dp, Color.White, CircleShape),
+                        .border(2.dp, SurfaceCard, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.CameraAlt, contentDescription = "Changer la photo", tint = Color.White, modifier = Modifier.size(16.dp))
                 }
             }
 
-            Text(nameText, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(nameText, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextPrimary)
             val refID = "EB-${(100000..999999).random()}"
-            Text("ID: $refID", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("ID: $refID", fontSize = 12.sp, color = TextSecondary)
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
-                    .background(ForestGreen.copy(alpha = 0.15f))
+                    .background(GainGreenBg)
                     .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ForestGreen, modifier = Modifier.size(14.dp))
-                    Text("Vérifié KYC", color = ForestGreen, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = GainGreen, modifier = Modifier.size(14.dp))
+                    Text("Vérifié KYC", color = GainGreen, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
-        // Photo Options Dialog (Prendre une photo / Choisir dans la Galerie)
+        // Photo Options Dialog
         if (showPhotoOptionDialog) {
             androidx.compose.ui.window.Dialog(onDismissRequest = { showPhotoOptionDialog = false }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Photo de Profil Client", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Prenez une photo de votre visage ou choisissez une image de votre galerie.", fontSize = 12.sp, color = Color.Gray)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Photo de Profil Client", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("Prenez une photo de votre visage ou choisissez une image de votre galerie.", fontSize = 12.sp, color = TextSecondary)
 
                         Button(
                             onClick = {
@@ -3683,11 +3729,11 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(Icons.Default.CameraAlt, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Prendre une Photo (Appareil Photo 📷)", fontWeight = FontWeight.Bold)
+                            Text("Prendre une Photo (Appareil Photo 📷)", fontWeight = FontWeight.Bold, color = Color.White)
                         }
 
                         OutlinedButton(
@@ -3697,31 +3743,32 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                                 android.widget.Toast.makeText(context, "🖼️ Photo de profil mise à jour !", android.widget.Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, BorderMedium),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                         ) {
-                            Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = OrangeBrand)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Choisir dans la Galerie 🖼️", fontWeight = FontWeight.Medium)
+                            Text("Choisir dans la Galerie 🖼️", fontWeight = FontWeight.Medium, color = TextPrimary)
                         }
 
                         TextButton(
                             onClick = { showPhotoOptionDialog = false },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Annuler", color = Color.Gray)
+                            Text("Annuler", color = TextSecondary)
                         }
                     }
                 }
             }
         }
 
-
-
         // Menu items Column list
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(1.dp, GrayBorder)
+            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+            border = BorderStroke(1.dp, BorderSubtle),
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column {
                 val menuItems = listOf(
@@ -3743,11 +3790,11 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                     ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(item.first, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(22.dp))
-                            Text(item.second, fontWeight = FontWeight.Medium, fontSize = 15.sp)
+                            Text(item.second, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextPrimary)
                         }
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextSecondary)
                     }
-                    HorizontalDivider(color = GrayBorder.copy(alpha = 0.5f))
+                    HorizontalDivider(color = BorderSubtle)
                 }
             }
         }
@@ -3761,35 +3808,37 @@ fun ProfileScreen(viewModel: BourseViewModel) {
         ) {
             Button(
                 onClick = { viewModel.resetDemoData() },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.buttonColors(containerColor = LossRedBg, contentColor = LossRed),
                 modifier = Modifier
                     .weight(1f)
                     .height(50.dp)
-                    .testTag("reset_demo_button")
+                    .testTag("reset_demo_button"),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.RestartAlt, contentDescription = null)
+                Icon(Icons.Default.RestartAlt, contentDescription = null, tint = LossRed)
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Réinitialiser", fontWeight = FontWeight.Bold)
+                Text("Réinitialiser", fontWeight = FontWeight.Bold, color = LossRed)
             }
 
             Button(
                 onClick = { viewModel.performLogout() },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.error),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = LossRed),
+                border = BorderStroke(1.dp, LossRed.copy(alpha = 0.4f)),
                 modifier = Modifier
                     .weight(1f)
-                    .height(50.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Logout, contentDescription = null)
+                Icon(Icons.Default.Logout, contentDescription = null, tint = LossRed)
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Déconnexion", fontWeight = FontWeight.Bold)
+                Text("Déconnexion", fontWeight = FontWeight.Bold, color = LossRed)
             }
         }
 
         Text(
             text = "Éléphant Bourse v2.4.1 (Stable)",
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            color = TextMuted
         )
     }
 
@@ -3797,34 +3846,39 @@ fun ProfileScreen(viewModel: BourseViewModel) {
     when (activeDialog) {
         "Informations Personnelles" -> {
             androidx.compose.ui.window.Dialog(onDismissRequest = { activeDialog = null }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Informations Personnelles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Prénom", fontSize = 11.sp, color = Color.Gray)
-                            Text(userProfile?.firstName ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                            HorizontalDivider()
-                            
-                            Text("Nom de famille", fontSize = 11.sp, color = Color.Gray)
-                            Text(userProfile?.lastName ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                            HorizontalDivider()
-                            
-                            Text("Adresse e-mail", fontSize = 11.sp, color = Color.Gray)
-                            Text(viewModel.firstNameInput.value.split("@").firstOrNull() ?: "investisseur@email.ci", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                            HorizontalDivider()
-                            
-                            Text("Numéro WhatsApp", fontSize = 11.sp, color = Color.Gray)
-                            Text(userProfile?.whatsapp ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Informations Personnelles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
+
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("Prénom", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text(userProfile?.firstName ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                            HorizontalDivider(color = BorderSubtle)
+
+                            Text("Nom de famille", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text(userProfile?.lastName ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                            HorizontalDivider(color = BorderSubtle)
+
+                            Text("Adresse e-mail", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text(viewModel.firstNameInput.value.split("@").firstOrNull() ?: "investisseur@email.ci", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                            HorizontalDivider(color = BorderSubtle)
+
+                            Text("Numéro WhatsApp", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Bold)
+                            Text(userProfile?.whatsapp ?: "-", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
                         }
 
                         Button(
                             onClick = { activeDialog = null },
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Fermer", fontWeight = FontWeight.Bold)
+                            Text("Fermer", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -3836,33 +3890,46 @@ fun ProfileScreen(viewModel: BourseViewModel) {
             val isFingerprint by viewModel.isFingerprintEnabled.collectAsStateWithLifecycle()
 
             androidx.compose.ui.window.Dialog(onDismissRequest = { activeDialog = null }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        Text("Sécurité & 2FA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        Text("Sécurité & 2FA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Authentification 2FA", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("Ajoute un code OTP temporaire à la connexion", fontSize = 11.sp, color = Color.Gray)
+                                Text("Authentification 2FA", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+                                Text("Ajoute un code OTP temporaire à la connexion", fontSize = 11.sp, color = TextSecondary)
                             }
-                            Switch(checked = is2fa, onCheckedChange = { viewModel.is2faEnabled.value = it })
+                            Switch(
+                                checked = is2fa,
+                                onCheckedChange = { viewModel.is2faEnabled.value = it },
+                                colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = OrangeBrand)
+                            )
                         }
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Empreinte Digitale / Biométrie", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("Déverrouillage rapide de l'application", fontSize = 11.sp, color = Color.Gray)
+                                Text("Empreinte Digitale / Biométrie", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+                                Text("Déverrouillage rapide de l'application", fontSize = 11.sp, color = TextSecondary)
                             }
-                            Switch(checked = isFingerprint, onCheckedChange = { viewModel.isFingerprintEnabled.value = it })
+                            Switch(
+                                checked = isFingerprint,
+                                onCheckedChange = { viewModel.isFingerprintEnabled.value = it },
+                                colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = OrangeBrand)
+                            )
                         }
 
                         Button(
                             onClick = { activeDialog = null },
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Sauvegarder", fontWeight = FontWeight.Bold)
+                            Text("Sauvegarder", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -3875,32 +3942,37 @@ fun ProfileScreen(viewModel: BourseViewModel) {
             var smsEnabled by remember { mutableStateOf(false) }
 
             androidx.compose.ui.window.Dialog(onDismissRequest = { activeDialog = null }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        Text("Préférences de Notifications", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        Text("Préférences de Notifications", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Notifications Push", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                            Switch(checked = pushEnabled, onCheckedChange = { pushEnabled = it })
+                            Text("Notifications Push", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = TextPrimary)
+                            Switch(checked = pushEnabled, onCheckedChange = { pushEnabled = it }, colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = OrangeBrand))
                         }
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Alertes E-mail", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                            Switch(checked = emailEnabled, onCheckedChange = { emailEnabled = it })
+                            Text("Alertes E-mail", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = TextPrimary)
+                            Switch(checked = emailEnabled, onCheckedChange = { emailEnabled = it }, colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = OrangeBrand))
                         }
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Alertes SMS", fontWeight = FontWeight.Medium, fontSize = 14.sp)
-                            Switch(checked = smsEnabled, onCheckedChange = { smsEnabled = it })
+                            Text("Alertes SMS", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = TextPrimary)
+                            Switch(checked = smsEnabled, onCheckedChange = { smsEnabled = it }, colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = OrangeBrand))
                         }
 
                         Button(
                             onClick = { activeDialog = null },
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Fermer", fontWeight = FontWeight.Bold)
+                            Text("Fermer", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -3909,10 +3981,15 @@ fun ProfileScreen(viewModel: BourseViewModel) {
 
         "Documents & Contrats" -> {
             androidx.compose.ui.window.Dialog(onDismissRequest = { activeDialog = null }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Documents & Contrats", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Téléchargez les documents officiels relatifs à vos activités d'investissement.", fontSize = 12.sp, color = Color.Gray)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Documents & Contrats", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("Téléchargez les documents officiels relatifs à vos activités d'investissement.", fontSize = 12.sp, color = TextSecondary)
 
                         val docs = listOf(
                             "Contrat d'Ouverture.pdf",
@@ -3923,18 +4000,23 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             docs.forEach { doc ->
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color(0xFFF9F9F9)).padding(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(SurfaceCard2)
+                                        .border(1.dp, BorderSubtle, RoundedCornerShape(12.dp))
+                                        .padding(12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.Description, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(20.dp))
-                                        Text(doc, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                        Text(doc, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
                                     }
                                     IconButton(onClick = {
                                         val pdfHeader = "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kinds [] /Count 1 >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF"
                                         val content = "====================================================\nÉLÉPHANT BOURSE - DOCUMENT OFFICIEL & CONTRAT SGI\n====================================================\nDocument: $doc\nClient: ${userProfile?.firstName ?: "Client"} ${userProfile?.lastName ?: ""}\nStatut: Conforme AMF-UMOA\nDate: Aujourd'hui\n====================================================\n" + pdfHeader
-                                        
+
                                         val success = savePdfDocumentToPhone(context, doc, content)
                                         if (success) {
                                             android.widget.Toast.makeText(context, "✅ $doc enregistré dans votre dossier Téléchargements !", android.widget.Toast.LENGTH_LONG).show()
@@ -3942,7 +4024,7 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                                             android.widget.Toast.makeText(context, "✅ Document $doc téléchargé !", android.widget.Toast.LENGTH_SHORT).show()
                                         }
                                     }, modifier = Modifier.size(24.dp)) {
-                                        Icon(Icons.Default.Download, contentDescription = "Télécharger", tint = ForestGreen, modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Default.Download, contentDescription = "Télécharger", tint = GainGreen, modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }
@@ -3952,9 +4034,9 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                             onClick = { activeDialog = null },
                             colors = ButtonDefaults.buttonColors(containerColor = OrangeBrand),
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Fermer", fontWeight = FontWeight.Bold)
+                            Text("Fermer", fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -3967,36 +4049,45 @@ fun ProfileScreen(viewModel: BourseViewModel) {
             var isSending by remember { mutableStateOf(false) }
 
             androidx.compose.ui.window.Dialog(onDismissRequest = { activeDialog = null }) {
-                Surface(shape = RoundedCornerShape(20.dp), color = Color.White, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Messagerie Support", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Posez vos questions directement aux administrateurs de la plate-forme.", fontSize = 12.sp, color = Color.Gray)
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = SurfaceCard,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Messagerie Support", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("Posez vos questions directement aux administrateurs de la plate-forme.", fontSize = 12.sp, color = TextSecondary)
 
                         OutlinedTextField(
                             value = subjectText,
                             onValueChange = { viewModel.supportSubjectInput.value = it },
                             label = { Text("Sujet") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         OutlinedTextField(
                             value = messageText,
                             onValueChange = { viewModel.supportMessageInput.value = it },
                             label = { Text("Votre message") },
+                            colors = baouTextFieldColors(),
                             modifier = Modifier.fillMaxWidth().height(120.dp),
                             maxLines = 5,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
 
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             OutlinedButton(
                                 onClick = { activeDialog = null },
                                 modifier = Modifier.weight(1f).height(48.dp),
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, BorderMedium),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary)
                             ) {
-                                Text("Fermer")
+                                Text("Fermer", color = TextSecondary)
                             }
                             Button(
                                 onClick = {
@@ -4011,13 +4102,13 @@ fun ProfileScreen(viewModel: BourseViewModel) {
                                 },
                                 enabled = messageText.isNotBlank() && !isSending,
                                 modifier = Modifier.weight(1f).height(48.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = ForestGreen),
-                                shape = RoundedCornerShape(10.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = GainGreen),
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 if (isSending) {
                                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                                 } else {
-                                    Text("Envoyer", fontWeight = FontWeight.Bold)
+                                    Text("Envoyer", fontWeight = FontWeight.Bold, color = Color.White)
                                 }
                             }
                         }
