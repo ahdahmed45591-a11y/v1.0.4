@@ -1,14 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
+// Mappage automatique des alias de tickers vers les noms de dossiers exacts
+const TICKER_MAP = {
+  'ETI':  'ETIT',
+  'SIB':  'SIBC',
+  'BICI': 'BICC',
+  'CBIB': 'CBIBF',
+  'SAPC': 'SPHC',
+};
+
 /**
  * Lit le fichier daily.csv d'un ticker et retourne les dernières informations de cours.
  * @param {string} ticker 
  * @returns {object|null}
  */
 function getTickerData(ticker) {
-  // Mapper ETI vers ETIT
-  const folderName = ticker === 'ETI' ? 'ETIT' : ticker;
+  const upperTicker = ticker.toUpperCase();
+  const folderName = TICKER_MAP[upperTicker] || upperTicker;
   const filePath = path.join(__dirname, '..', 'brvm_data', folderName, `${folderName}.daily.csv`);
   
   try {
@@ -22,8 +31,6 @@ function getTickerData(ticker) {
     
     if (lines.length < 2) return null; // Seulement le header
     
-    // Le fichier contient : Date,Open,High,Low,Close,Volume
-    // Les lignes sont par ordre chronologique, la dernière ligne est la plus récente
     const lastLine = lines[lines.length - 1];
     const prevLine = lines[lines.length - 2];
     
@@ -34,7 +41,7 @@ function getTickerData(ticker) {
     const prevPrice = parseFloat(prevParts[4]); // Close précédent
     
     const change = prevPrice ? ((price - prevPrice) / prevPrice) * 100 : 0.0;
-    const volume = parseInt(lastParts[5]);
+    const volume = parseInt(lastParts[5]) || 0;
     
     return {
       price,
