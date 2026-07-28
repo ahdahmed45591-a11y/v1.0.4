@@ -101,8 +101,16 @@ class BourseRepository(private val bourseDao: BourseDao) {
             if (response.isSuccessful) {
                 "SUCCESS"
             } else {
-                "Échec: " + (response.errorBody()?.string() ?: "Code ${response.code()}")
+                val errorBodyString = response.errorBody()?.string() ?: ""
+                val cleanErrorMsg = try {
+                    val jsonObj = org.json.JSONObject(errorBodyString)
+                    jsonObj.optString("error", jsonObj.optString("message", errorBodyString))
+                } catch (e: Exception) {
+                    errorBodyString
+                }
+                cleanErrorMsg.ifEmpty { "Échec (code ${response.code()})" }
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
             "Erreur réseau: ${e.localizedMessage}"
