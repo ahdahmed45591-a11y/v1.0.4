@@ -47,6 +47,8 @@ import com.example.ui.theme.*
 import com.example.viewmodel.BourseViewModel
 import com.example.viewmodel.Screen
 import com.example.viewmodel.StockWatchItem
+import java.text.NumberFormat
+import java.util.Locale
 
 fun savePdfDocumentToPhone(context: android.content.Context, fileName: String, pdfContent: String): Boolean {
     return try {
