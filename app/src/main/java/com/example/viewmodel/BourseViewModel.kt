@@ -480,26 +480,17 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
 
             try {
                 val redirectUrl = android.net.Uri.encode("baou://payment/success?status=success&amount=${amt.toInt()}")
-                val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?amount=${amt.toInt()}&src=p&redirect_url=$redirectUrl"
+                val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p&amount=${amt.toInt()}&redirect_url=$redirectUrl"
 
-                val pm = context.packageManager
-                val waveIntent = pm.getLaunchIntentForPackage("com.wave.personal")
-
-                if (waveIntent != null) {
-                    waveIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(waveIntent)
-                } else {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(waveUrl))
-                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                }
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(waveUrl))
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
 
                 viewModelScope.launch {
-                    _transactionStatus.emit("📱 Application Wave lancée pour le dépôt de ${amt.toInt()} FCFA. Confirmez le paiement pour crédit immédiat.")
+                    _transactionStatus.emit("📱 Ouverture du compte marchand Wave (${amt.toInt()} FCFA)... Confirmez le paiement pour crédit immédiat.")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Si l'ouverture échoue, proposer la confirmation manuelle
                 viewModelScope.launch {
                     _transactionStatus.emit("Veuillez finaliser le paiement dans Wave puis revenir valider.")
                 }
