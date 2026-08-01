@@ -144,9 +144,15 @@ class BourseRepository(private val bourseDao: BourseDao) {
                         else -> "EN ATTENTE"
                     }
                     val amountFmt = if (netTx.type == "BUY") -netTx.total else netTx.total
+                    val titleFmt = when(netTx.type) {
+                        "BUY" -> "Achat ${netTx.company}"
+                        "SELL" -> "Vente ${netTx.company}"
+                        "DEPOSIT", "RECHARGE" -> netTx.company.ifEmpty { "Dépôt ${netTx.paymentMethod ?: "Wave"}" }
+                        else -> "Transaction ${netTx.company}"
+                    }
                     TransactionEntity(
-                        type = netTx.type,
-                        title = if (netTx.type == "BUY") "Achat ${netTx.company}" else "Vente ${netTx.company}",
+                        type = if (netTx.type == "RECHARGE") "DEPOSIT" else netTx.type,
+                        title = titleFmt,
                         date = "Aujourd'hui",
                         reference = netTx.id,
                         status = statusFmt,
@@ -171,40 +177,49 @@ class BourseRepository(private val bourseDao: BourseDao) {
                     bourseDao.clearAllHoldings()
                     val holdingsMap = mutableMapOf<String, HoldingsEntity>()
 
-                    for (netTx in response.data) {
-                        if (netTx.status == "validated") {
-                            if (netTx.type == "BUY") {
-                                balance -= netTx.grandTotal
-                                val existing = holdingsMap[netTx.ticker]
-                                if (existing != null) {
-                                    val newQty = existing.sharesCount + netTx.quantity
-                                    holdingsMap[netTx.ticker] = existing.copy(
-                                        sharesCount = newQty,
-                                        currentPrice = netTx.price
-                                    )
-                                } else {
-                                    holdingsMap[netTx.ticker] = HoldingsEntity(
-                                        ticker = netTx.ticker,
-                                        companyName = netTx.company,
-                                        sharesCount = netTx.quantity,
-                                        averagePrice = netTx.price,
-                                        currentPrice = netTx.price,
-                                        changePercent = 1.25, // défaut
-                                        sector = "Bourse"
-                                    )
-                                }
-                            } else if (netTx.type == "SELL") {
-                                balance += netTx.total
-                                val existing = holdingsMap[netTx.ticker]
-                                if (existing != null) {
-                                    val newQty = existing.sharesCount - netTx.quantity
-                                    if (newQty <= 0) {
-                                        holdingsMap.remove(netTx.ticker)
+                    val validatedTxs = response.data.filter { it.status == "validated" }
+                    if (validatedTxs.isNotEmpty()) {
+                        var calculatedBalance = 0.0
+                        for (netTx in response.data) {
+                            if (netTx.status == "validated") {
+                                if (netTx.type == "BUY") {
+                                    calculatedBalance -= netTx.grandTotal
+                                    val existing = holdingsMap[netTx.ticker]
+                                    if (existing != null) {
+                                        val newQty = existing.sharesCount + netTx.quantity
+                                        holdingsMap[netTx.ticker] = existing.copy(
+                                            sharesCount = newQty,
+                                            currentPrice = netTx.price
+                                        )
                                     } else {
-                                        holdingsMap[netTx.ticker] = existing.copy(sharesCount = newQty)
+                                        holdingsMap[netTx.ticker] = HoldingsEntity(
+                                            ticker = netTx.ticker,
+                                            companyName = netTx.company,
+                                            sharesCount = netTx.quantity,
+                                            averagePrice = netTx.price,
+                                            currentPrice = netTx.price,
+                                            changePercent = 1.25, // défaut
+                                            sector = "Bourse"
+                                        )
                                     }
+                                } else if (netTx.type == "SELL") {
+                                    calculatedBalance += netTx.total
+                                    val existing = holdingsMap[netTx.ticker]
+                                    if (existing != null) {
+                                        val newQty = existing.sharesCount - netTx.quantity
+                                        if (newQty <= 0) {
+                                            holdingsMap.remove(netTx.ticker)
+                                        } else {
+                                            holdingsMap[netTx.ticker] = existing.copy(sharesCount = newQty)
+                                        }
+                                    }
+                                } else if (netTx.type == "DEPOSIT" || netTx.type == "RECHARGE") {
+                                    calculatedBalance += netTx.total
                                 }
                             }
+                        }
+                        if (calculatedBalance > 0) {
+                            balance = calculatedBalance
                         }
                     }
 
@@ -252,50 +267,18 @@ class BourseRepository(private val bourseDao: BourseDao) {
     suspend fun depositFunds(amount: Double, paymentMethod: String): Boolean {
         if (amount <= 0) return false
         
-        val currentToken = token
-        if (currentToken != null) {
-            return try {
-                val ref = "REF-" + (100000..999999).random()
-                val response = com.example.data.network.ApiClient.service.submitTransaction(
-                    currentToken,
-                    com.example.data.network.TransactionRequest(
-                        ticker = "ETI", // par défaut pour le dépôt fictif
-                        type = "SELL", // on simule l'ajout de fonds
-                        quantity = 1,
-                        price = amount,
-                        paymentRef = ref,
-                        paymentMethod = paymentMethod
-                    )
-                )
-                if (response.isSuccessful) {
-                    val depositTransaction = TransactionEntity(
-                        type = "DEPOSIT",
-                        title = "Dépôt $paymentMethod",
-                        date = "Aujourd'hui",
-                        reference = ref,
-                        status = "EN ATTENTE",
-                        amount = amount
-                    )
-                    bourseDao.insertTransaction(depositTransaction)
-                    true
-                } else {
-                    false
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
-        }
-
-        // Fallback local
-        val profile = bourseDao.getUserProfile() ?: return false
-        val updatedProfile = profile.copy(cashBalance = profile.cashBalance + amount)
-        bourseDao.insertUserProfile(updatedProfile)
-
         val dateFormat = SimpleDateFormat("Aujourd'hui, HH:mm", Locale.getDefault())
         val dateString = dateFormat.format(Date())
         val reference = "REF-" + (100000..999999).random()
 
+        // 1. Mettre à jour le solde cash local immédiatement
+        val profile = bourseDao.getUserProfile()
+        if (profile != null) {
+            val updatedProfile = profile.copy(cashBalance = profile.cashBalance + amount)
+            bourseDao.insertUserProfile(updatedProfile)
+        }
+
+        // 2. Insérer la transaction de dépôt locale avec le statut TERMINÉ
         val depositTransaction = TransactionEntity(
             type = "DEPOSIT",
             title = "Dépôt $paymentMethod",
@@ -305,6 +288,28 @@ class BourseRepository(private val bourseDao: BourseDao) {
             amount = amount
         )
         bourseDao.insertTransaction(depositTransaction)
+
+        // 3. Synchroniser avec le serveur backend si connecté
+        val currentToken = token
+        if (currentToken != null) {
+            try {
+                com.example.data.network.ApiClient.service.submitTransaction(
+                    currentToken,
+                    com.example.data.network.TransactionRequest(
+                        ticker = "CASH",
+                        type = "DEPOSIT",
+                        quantity = 1,
+                        price = amount,
+                        paymentRef = reference,
+                        paymentMethod = paymentMethod
+                    )
+                )
+                syncTransactions()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         return true
     }
 

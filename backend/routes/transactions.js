@@ -62,40 +62,81 @@ router.get('/:id', requireAuth, (req, res) => {
   res.json({ success: true, data: tx });
 });
 
-// POST /api/transactions — Passer un ordre d'achat ou de vente
+// POST /api/transactions — Passer un ordre d'achat, de vente ou effectuer un dépôt
 router.post('/', requireAuth, (req, res) => {
   const { ticker, type, quantity, price, paymentRef, paymentMethod } = req.body;
 
-  if (!ticker || !type || !quantity || !price) {
-    return res.status(400).json({ error: 'Ticker, type, quantité et prix sont requis.' });
+  if (!type || (!price && price !== 0)) {
+    return res.status(400).json({ error: 'Type et prix sont requis.' });
   }
 
-  if (!['BUY', 'SELL'].includes(type.toUpperCase())) {
-    return res.status(400).json({ error: 'Type doit être BUY ou SELL.' });
+  const typeUpper = type.toUpperCase();
+  if (!['BUY', 'SELL', 'DEPOSIT', 'RECHARGE'].includes(typeUpper)) {
+    return res.status(400).json({ error: 'Type doit être BUY, SELL, DEPOSIT ou RECHARGE.' });
   }
 
-  const qtyNum = parseInt(quantity);
+  const qtyNum = parseInt(quantity || 1);
   const priceNum = parseFloat(price);
 
   if (isNaN(qtyNum) || qtyNum <= 0) {
     return res.status(400).json({ error: 'La quantité doit être un entier positif.' });
   }
   if (isNaN(priceNum) || priceNum <= 0) {
-    return res.status(400).json({ error: 'Le prix doit être un nombre positif.' });
+    return res.status(400).json({ error: 'Le montant doit être un nombre positif.' });
   }
-
-  const stock = stocks.find(s => s.ticker === ticker.toUpperCase());
-  if (!stock) return res.status(404).json({ error: `Titre "${ticker}" introuvable.` });
 
   const user = users.find(u => u.id === req.session.userId);
   if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+
+  // Traitement spécial pour les DÉPÔTS (Wave, Orange Money, etc.)
+  if (typeUpper === 'DEPOSIT' || typeUpper === 'RECHARGE') {
+    const depTotal = Math.round(priceNum * 100) / 100;
+    user.balance = Math.round((user.balance + depTotal) * 100) / 100;
+    saveUserToSupabase(user);
+
+    const depTx = {
+      id: uuidv4(),
+      userId: req.session.userId,
+      userEmail: user.email,
+      userName: user.name,
+      ticker: (ticker || 'CASH').toUpperCase(),
+      company: `Dépôt ${paymentMethod || 'Wave CI'}`,
+      type: 'DEPOSIT',
+      quantity: 1,
+      price: depTotal,
+      total: depTotal,
+      fees: 0,
+      tva: 0,
+      grandTotal: depTotal,
+      status: 'validated',
+      paymentRef: paymentRef || `REF-${Math.floor(100000 + Math.random() * 900000)}`,
+      paymentMethod: paymentMethod || 'Wave CI',
+      rejectionReason: null,
+      submittedAt: new Date().toISOString(),
+      processedAt: new Date().toISOString(),
+      processedBy: 'SYSTEM',
+    };
+
+    transactions.unshift(depTx);
+    saveTransactionToSupabase(depTx);
+
+    return res.status(201).json({
+      success: true,
+      message: `Dépôt de ${depTotal} FCFA effectué avec succès !`,
+      data: depTx,
+    });
+  }
+
+  // Ordres d'Achat (BUY) et de Vente (SELL)
+  const stock = stocks.find(s => s.ticker === (ticker || '').toUpperCase());
+  if (!stock) return res.status(404).json({ error: `Titre "${ticker}" introuvable.` });
 
   const total = qtyNum * priceNum;
   const fees = total * 0.005;       // 0.5%
   const tva = fees * 0.18;           // 18% TVA sur frais
   const grandTotal = total + fees + tva;
 
-  if (type.toUpperCase() === 'BUY' && user.balance < grandTotal) {
+  if (typeUpper === 'BUY' && user.balance < grandTotal) {
     return res.status(400).json({
       error: `Solde insuffisant. Requis: ${grandTotal.toFixed(0)} FCFA, Disponible: ${user.balance} FCFA`,
     });
@@ -108,7 +149,7 @@ router.post('/', requireAuth, (req, res) => {
     userName: user.name,
     ticker: ticker.toUpperCase(),
     company: stock.company,
-    type: type.toUpperCase(),
+    type: typeUpper,
     quantity: qtyNum,
     price: priceNum,
     total: Math.round(total * 100) / 100,
