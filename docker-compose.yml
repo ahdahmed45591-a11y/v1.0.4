@@ -1,16 +1,33 @@
 services:
-  backend:
+  backend-core:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: baou_finance_backend
+    container_name: baou_finance_core
+    command: node core/server_core.js
     ports:
-      - "3001:3001"
+      - "3002:3002"
     volumes:
       - ./backend/data:/app/data
     environment:
-      - PORT=3001
+      - CORE_PORT=3002
       - NODE_ENV=production
+    restart: always
+
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: baou_finance_api
+    command: node api/server_api.js
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - CORE_SERVICE_URL=http://backend-core:3002
+      - NODE_ENV=production
+    depends_on:
+      - backend-core
     restart: always
 
   admin:
@@ -21,5 +38,5 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - backend-api
     restart: always
