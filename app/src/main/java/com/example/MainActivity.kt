@@ -41,9 +41,9 @@ class MainActivity : ComponentActivity() {
         val data = intent?.data ?: return
         if (data.scheme == "baou" && data.host == "payment") {
             val status = data.getQueryParameter("status") ?: "success"
+            val amountParam = data.getQueryParameter("amount")?.toDoubleOrNull()
             if (status == "success" || status == "completed") {
-                // Refresh portfolio and balance after successful Wave payment
-                viewModel.refreshAfterWavePayment()
+                viewModel.confirmWaveDeposit(amountParam)
             }
         }
     }

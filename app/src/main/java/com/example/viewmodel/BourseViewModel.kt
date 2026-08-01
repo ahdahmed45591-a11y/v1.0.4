@@ -452,6 +452,8 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    val pendingWaveDepositState = MutableStateFlow<Double>(0.0)
+
     // Transaction Actions
     fun executeDeposit(context: android.content.Context) {
         val profile = userProfile.value
@@ -470,30 +472,67 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
-        viewModelScope.launch {
-            val isWave = depositPaymentMethod.value == "Wave CI"
-            val success = repository.depositFunds(amt, depositPaymentMethod.value)
-            if (success) {
-                depositAmountInput.value = ""
-                _transactionStatus.emit("Dépôt de ${amt.toInt()} FCFA effectué avec succès !")
-                
-                if (isWave) {
-                    try {
-                        // URL Wave avec deep link de retour vers BAOU après paiement
-                        val redirectUrl = android.net.Uri.encode("baou://payment/success?status=success")
-                        val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p&redirect_url=$redirectUrl"
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(waveUrl))
-                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+        val isWave = depositPaymentMethod.value == "Wave CI"
+
+        if (isWave) {
+            pendingWaveDepositState.value = amt
+            depositAmountInput.value = ""
+
+            try {
+                val redirectUrl = android.net.Uri.encode("baou://payment/success?status=success&amount=${amt.toInt()}")
+                val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?amount=${amt.toInt()}&src=p&redirect_url=$redirectUrl"
+
+                val pm = context.packageManager
+                val waveIntent = pm.getLaunchIntentForPackage("com.wave.personal")
+
+                if (waveIntent != null) {
+                    waveIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(waveIntent)
+                } else {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(waveUrl))
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
                 }
-                
+
+                viewModelScope.launch {
+                    _transactionStatus.emit("📱 Application Wave lancée pour le dépôt de ${amt.toInt()} FCFA. Confirmez le paiement pour crédit immédiat.")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Si l'ouverture échoue, proposer la confirmation manuelle
+                viewModelScope.launch {
+                    _transactionStatus.emit("Veuillez finaliser le paiement dans Wave puis revenir valider.")
+                }
+            }
+        } else {
+            viewModelScope.launch {
+                val success = repository.depositFunds(amt, depositPaymentMethod.value)
+                if (success) {
+                    depositAmountInput.value = ""
+                    _transactionStatus.emit("Dépôt de ${amt.toInt()} FCFA effectué avec succès !")
+                    repository.syncTransactions()
+                    navigateTo(Screen.PORTFOLIO)
+                } else {
+                    _transactionStatus.emit("Échec du dépôt.")
+                }
+            }
+        }
+    }
+
+    fun confirmWaveDeposit(amountOverride: Double? = null) {
+        val amtToCredit = amountOverride ?: pendingWaveDepositState.value
+        if (amtToCredit <= 0) return
+
+        pendingWaveDepositState.value = 0.0
+
+        viewModelScope.launch {
+            val success = repository.depositFunds(amtToCredit, "Wave CI")
+            if (success) {
+                _transactionStatus.emit("🎉 Dépôt Wave de ${amtToCredit.toInt()} FCFA confirmé ! Votre portefeuille a été mis à jour.")
                 repository.syncTransactions()
-                navigateTo(Screen.DASHBOARD)
+                navigateTo(Screen.PORTFOLIO)
             } else {
-                _transactionStatus.emit("Échec du dépôt.")
+                _transactionStatus.emit("Erreur lors de la confirmation du dépôt Wave.")
             }
         }
     }
@@ -592,17 +631,7 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun refreshAfterWavePayment() {
-        viewModelScope.launch {
-            try {
-                // Synchronise les transactions et le solde depuis le serveur
-                repository.syncTransactions()
-                _transactionStatus.emit("✅ Paiement Wave confirmé ! Votre solde a été mis à jour.")
-            } catch (e: Exception) {
-                _transactionStatus.emit("✅ Retour confirmé. Synchronisation en cours...")
-            }
-            // Retourner au Dashboard
-            navigateTo(Screen.DASHBOARD)
-        }
+        confirmWaveDeposit()
     }
 
     fun sendChatMessage(text: String) {

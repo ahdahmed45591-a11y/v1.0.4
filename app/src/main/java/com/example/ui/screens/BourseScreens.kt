@@ -3210,6 +3210,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
 
     val amtDouble = amountInput.toDoubleOrNull() ?: 0.0
     val formattedAmt = amtDouble.formatFcfa()
+    val pendingWaveAmt by viewModel.pendingWaveDepositState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -3237,6 +3238,38 @@ fun DepositScreen(viewModel: BourseViewModel) {
 
             IconButton(onClick = { }, enabled = false) {
                 Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = Color.Transparent)
+            }
+        }
+
+        // Banner de dépôt Wave en attente de confirmation
+        if (pendingWaveAmt > 0) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1DA1F2).copy(alpha = 0.12f)),
+                border = BorderStroke(1.dp, Color(0xFF1DA1F2)),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF1DA1F2))
+                        Text("Paiement Wave en cours", fontWeight = FontWeight.Bold, color = TextPrimary)
+                    }
+                    Text(
+                        text = "Vous avez initié un dépôt Wave de ${pendingWaveAmt.formatFcfa()}. Confirmez dès que le paiement est effectué dans Wave pour créditer votre portefeuille.",
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+                    Button(
+                        onClick = { viewModel.confirmWaveDeposit() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DA1F2))
+                    ) {
+                        Text("✅ Valider et créditer mon portefeuille (${pendingWaveAmt.formatFcfa()})", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                }
             }
         }
 
