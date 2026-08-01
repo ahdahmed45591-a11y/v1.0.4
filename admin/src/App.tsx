@@ -69,6 +69,8 @@ function mapUser(u: any): User {
 
 function mapTransaction(t: any): Transaction {
   const s = (t.status || '').toLowerCase();
+  const rawType = (t.type || 'BUY').toUpperCase();
+  const txType: 'BUY' | 'SELL' | 'DEPOSIT' = (rawType === 'DEPOSIT' || rawType === 'RECHARGE') ? 'DEPOSIT' : (rawType === 'SELL' ? 'SELL' : 'BUY');
   return {
     id: t.id,
     clientName: t.userName || 'Client',
@@ -77,13 +79,13 @@ function mapTransaction(t: any): Transaction {
     clientEmail: t.userEmail || t.userId || 'inconnu@email.ci',
     clientAvatar: DEFAULT_AVATAR,
     accountType: 'Standard',
-    balance: 0,
-    ticker: t.ticker || '-',
-    companyName: t.company || t.ticker || '-',
-    type: (t.type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
-    quantity: t.quantity || 0,
-    unitPrice: t.price || 0,
-    totalAmount: t.total || 0,
+    balance: typeof t.balance === 'number' ? t.balance : (parseFloat(t.balance) || 0),
+    ticker: t.ticker || (txType === 'DEPOSIT' ? 'CASH' : '-'),
+    companyName: t.company || (txType === 'DEPOSIT' ? 'Dépôt Mobile Money' : (t.ticker || '-')),
+    type: txType,
+    quantity: t.quantity || 1,
+    unitPrice: t.price || t.total || 0,
+    totalAmount: t.total || t.grandTotal || 0,
     market: 'BRVM',
     // ✅ toLocaleString() supporte hour/minute (toLocaleDateString ne le supporte pas)
     dateString: t.submittedAt
@@ -95,8 +97,8 @@ function mapTransaction(t: any): Transaction {
         : s === 'rejected'
         ? 'REJECTED'
         : 'PENDING',
-    paymentMethod: t.paymentMethod || 'Non spécifié',
-    paymentMethodCode: 'OM',
+    paymentMethod: t.paymentMethod || 'Wave CI',
+    paymentMethodCode: (t.paymentMethod || '').toLowerCase().includes('wave') ? 'WV' : 'OM',
     reference: t.paymentRef || `REF-${t.id}`,
     proofFileName: `Reçu_${t.id}.pdf`,
     proofFileSize: '1.2 MB',
@@ -166,7 +168,7 @@ export default function App() {
   const [opTicker, setOpTicker] = useState('SNTS');
   const [opQty, setOpQty] = useState('100');
   const [opUnitPrice, setOpUnitPrice] = useState('16200');
-  const [opType, setOpType] = useState<'BUY' | 'SELL'>('BUY');
+  const [opType, setOpType] = useState<'BUY' | 'SELL' | 'DEPOSIT'>('BUY');
   const [opMethod, setOpMethod] = useState<'OM' | 'WV' | 'BANK'>('OM');
 
   // ── Toast helper ─────────────────────────────────────────
@@ -636,6 +638,7 @@ export default function App() {
                     className="w-full bg-white border border-[#dec1af]/45 rounded-lg px-3 py-2 focus:ring-1 focus:ring-[#ff8200] outline-none">
                     <option value="BUY">Achat</option>
                     <option value="SELL">Vente</option>
+                    <option value="DEPOSIT">Dépôt / Recharge Solde</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">

@@ -16,7 +16,7 @@ export interface Transaction {
   balance: number; // Available balance
   ticker: string;
   companyName: string;
-  type: 'BUY' | 'SELL';
+  type: 'BUY' | 'SELL' | 'DEPOSIT';
   quantity: number;
   unitPrice: number;
   totalAmount: number;

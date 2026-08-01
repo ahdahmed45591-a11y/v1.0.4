@@ -390,14 +390,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         {tx.companyName}
                       </span>
                     </td>
-                    {/* BUY / SELL Action Pill */}
+                    {/* BUY / SELL / DEPOSIT Action Pill */}
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                         tx.type === 'BUY'
                           ? 'bg-[#8bf6a1]/30 text-[#007234]'
+                          : tx.type === 'DEPOSIT'
+                          ? 'bg-[#d6e3ff] text-[#005db6]'
                           : 'bg-[#ffdad6] text-[#93000a]'
                       }`}>
-                        {tx.type}
+                        {tx.type === 'DEPOSIT' ? 'DÉPÔT' : tx.type}
                       </span>
                     </td>
                     {/* Amount formatted */}

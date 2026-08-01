@@ -354,6 +354,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                   <th className="px-6 py-3.5">Client & ID</th>
                   <th className="px-6 py-3.5">Type de Compte</th>
                   <th className="px-6 py-3.5">Statut KYC</th>
+                  <th className="px-6 py-3.5 text-right">Solde Cash</th>
                   <th className="px-6 py-3.5">Dernière Activité</th>
                   <th className="px-6 py-3.5 text-right">Action</th>
                 </tr>
@@ -398,6 +399,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                     {/* KYC Badge Column */}
                     <td className="px-6 py-4">
                       {getKycBadge(user.kycStatus)}
+                    </td>
+                    {/* Available Cash Balance */}
+                    <td className="px-6 py-4 text-right font-sans font-extrabold text-[14px] text-[#006d31]">
+                      {new Intl.NumberFormat('fr-FR').format(user.balance || 0)} FCFA
                     </td>
                     {/* Last Activity metadata */}
                     <td className="px-6 py-4">
