@@ -10,10 +10,13 @@ echo       BAOU FINANCE - ECOSYSTEME MICROSERVICES v1.0.4
 echo ========================================================
 echo.
 
-echo [1/3] Demarrage du Backend Microservices (Core: 3002 + REST API: 3001)...
+echo Nettoyage des anciens processus Node en cours...
+taskkill /F /IM node.exe >nul 2>&1
+
+echo [1/3] Demarrage de l'Ecosysteme Microservices (Core: 3002 + REST API: 3001)...
 start "BAOU Backend Microservices (Core:3002 + REST API:3001)" cmd /k "cd /d ""%ROOT_DIR%backend"" && npm install --silent && node server.js"
 
-echo Attente de la mise en route des services Core (3002) et REST API (3001)...
+echo Attente du demarrage du Moteur Core (3002) et de la REST API Gateway (3001)...
 timeout /t 5 >nul
 
 echo [2/3] Demarrage du Portail Web Administrateur (Port 3000)...
@@ -37,6 +40,10 @@ echo  ARCHITECTURE MICROSERVICES :
 echo    - Core Service (Moteur & DB) : http://localhost:3002
 echo    - REST API Gateway           : http://localhost:3001
 echo.
+echo  PAIEMENT MARCHAND WAVE CI :
+echo    - Lien marchand : https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p
+echo    - Return Deep Link : baou://payment/success
+echo.
 echo  BASE DE DONNEES SQLITE LOCALE :
 echo    Fichier : backend\data\baou_finance.db
 echo    Uploads : backend\uploads\
@@ -50,10 +57,10 @@ echo       ex: https://xxxx.ngrok-free.app/api/
 echo    5. Cliquez sur Enregistrer
 echo.
 echo  NOUVEAUTES v1.0.4 :
-echo    - Ecosysteme decoupe Core:3002 <-> REST API:3001 [OK]
-echo    - Redirection vers l'application Wave pour depot [OK]
-echo    - Validation automatique deep link (baou://payment/success) [OK]
-echo    - Colonne Solde Cash et Recharges dans l'Admin [OK]
+echo    - Microservices decoupes Core:3002 <-> REST API:3001 [OK]
+echo    - Ouverture directe compte marchand Wave M_ci_XRkfDq_9M8GP [OK]
+echo    - Validation auto portefeuille au retour de Wave [OK]
+echo    - Colonne Solde Cash et Recharges manuelles dans l'Admin [OK]
 echo ========================================================
 echo.
 pause
