@@ -22,17 +22,17 @@ const MAX_BASE64_SIZE = 10 * 1024 * 1024;
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-  const { email, password, firstName } = req.body;
+  const { email, password, firstName, name } = req.body;
+  const userName = (name || firstName || '').trim();
 
-  if (!email || !password || !firstName) {
-    return res.status(400).json({ error: 'Prénom, email et mot de passe/code PIN requis.' });
+  if (!email || !password || !userName) {
+    return res.status(400).json({ error: 'Prénom/Nom, email et mot de passe requis.' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'Le mot de passe ou code PIN doit contenir au moins 6 caractères.' });
   }
 
-
-  const existingUser = users.find(u => u.email === email);
+  const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
   if (existingUser) {
     return res.status(400).json({ error: 'Cet e-mail est déjà utilisé.' });
   }
@@ -42,15 +42,15 @@ router.post('/register', async (req, res) => {
 
   const newUser = {
     id: `EB-CI-${Math.floor(10000 + Math.random() * 90000)}`,
-    name: firstName,
-    email: email,
+    name: userName,
+    email: email.toLowerCase().trim(),
     password: hashedPassword,
     role: 'client',
     type: 'Standard',
     kyc: 'pending',
     balance: 0.0,
     joinedAt: new Date().toISOString().split('T')[0],
-    avatar: firstName.substring(0, 2).toUpperCase()
+    avatar: userName.substring(0, 2).toUpperCase()
   };
 
   users.push(newUser);

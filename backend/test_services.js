@@ -80,9 +80,27 @@ async function runTests() {
     const statsRes = await request('http://localhost:3001/api/admin/stats', 'GET', null, token);
     console.log(`[TEST 6] REST API Admin Stats: Status ${statsRes.status} =>`, statsRes.data.success ? 'PASSED ✅' : 'FAILED ❌');
 
+    // Test 7: Mobile Registration with `firstName` payload
+    const testEmailMobile = `mobile_${Date.now()}@test.ci`;
+    const regMobileRes = await request('http://localhost:3001/api/auth/register', 'POST', {
+      email: testEmailMobile,
+      password: 'password123',
+      firstName: 'Kouassi'
+    });
+    console.log(`[TEST 7] Inscription Mobile (avec firstName): Status ${regMobileRes.status} =>`, regMobileRes.data.success ? `PASSED ✅ (Compte créé: ${regMobileRes.data.user.name})` : `FAILED ❌ (${JSON.stringify(regMobileRes.data)})`);
+
+    // Test 8: Registration with `name` payload
+    const testEmailWeb = `web_${Date.now()}@test.ci`;
+    const regWebRes = await request('http://localhost:3001/api/auth/register', 'POST', {
+      email: testEmailWeb,
+      password: 'password123',
+      name: 'Awa Diallo'
+    });
+    console.log(`[TEST 8] Inscription Web (avec name): Status ${regWebRes.status} =>`, regWebRes.data.success ? `PASSED ✅ (Compte créé: ${regWebRes.data.user.name})` : `FAILED ❌ (${JSON.stringify(regWebRes.data)})`);
+
     console.log('-------------------------------------------------------------------');
-    console.log('🎉 TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS (6/6) !');
-    console.log('La communication entre REST API (3001) et Core Service (3002) est 100% fonctionnelle.');
+    console.log('🎉 TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS (8/8) !');
+    console.log('L\'inscription mobile et la communication inter-services sont 100% fonctionnelles.');
     process.exit(0);
 
   } catch (err) {

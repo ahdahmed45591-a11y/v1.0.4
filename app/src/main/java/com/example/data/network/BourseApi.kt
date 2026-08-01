@@ -65,7 +65,7 @@ data class UpdateProfileRequest(
     val signatureStatus: String? = null
 )
 
-data class RegisterRequest(val email: String, val password: String, val firstName: String)
+data class RegisterRequest(val email: String, val password: String, val firstName: String, val name: String = firstName)
 
 data class SupportRequest(val subject: String, val message: String)
 

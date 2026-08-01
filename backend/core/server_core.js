@@ -65,12 +65,14 @@ app.post('/internal/auth/login', async (req, res) => {
 });
 
 app.post('/internal/auth/register', async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Email, mot de passe et nom sont requis.' });
+  const { email, password, name, firstName } = req.body;
+  const userName = (name || firstName || '').trim();
+
+  if (!email || !password || !userName) {
+    return res.status(400).json({ error: 'Email, mot de passe et nom/prénom sont requis.' });
   }
 
-  const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const existing = users.find(u => u.email.toLowerCase() === (email || '').toLowerCase().trim());
   if (existing) {
     return res.status(409).json({ error: 'Un compte existe déjà avec cet email.' });
   }
@@ -78,8 +80,8 @@ app.post('/internal/auth/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = {
     id: `CLI-${Date.now()}`,
-    name,
-    email,
+    name: userName,
+    email: email.toLowerCase().trim(),
     password: hashedPassword,
     role: 'client',
     kyc: 'pending',
