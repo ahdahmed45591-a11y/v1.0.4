@@ -20,3 +20,15 @@ debug.keystore
 # Node.js dependencies
 node_modules/
 dist/
+
+# Fichiers SQLite temporaires
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Fichiers Android générés
+app/build/
+/app/release/
+
+# Fichiers accidentels
+Saisissez
