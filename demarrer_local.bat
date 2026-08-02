@@ -13,21 +13,28 @@ echo.
 echo Nettoyage des anciens processus Node en cours...
 taskkill /F /IM node.exe >nul 2>&1
 
-echo [1/3] Demarrage de l'Ecosysteme Microservices (Core: 3002 + REST API: 3001)...
-start "BAOU Backend Microservices (Core:3002 + REST API:3001)" cmd /k "cd /d ""%ROOT_DIR%backend"" && npm install --silent && node server.js"
+echo.
+echo [1/4] Demarrage de l'Ecosysteme Microservices (Core: 3002 + REST API: 3001)...
+start "BAOU Backend Microservices (Core:3002 + REST API:3001)" cmd /k "cd /d ""%ROOT_DIR%backend"" && node server.js"
 
-echo Attente du demarrage du Moteur Core (3002) et de la REST API Gateway (3001)...
-timeout /t 5 >nul
+echo Attente du demarrage (5 secondes)...
+ping -n 6 127.0.0.1 >nul
 
-echo [2/3] Demarrage du Portail Web Administrateur (Port 3000)...
+echo.
+echo [2/4] Verification et tests des microservices (8 tests)...
+node "%ROOT_DIR%backend\test_services.js"
+
+echo.
+echo [3/4] Demarrage du Portail Web Administrateur (Port 3000)...
 start "BAOU Admin Web" cmd /k "cd /d ""%ROOT_DIR%admin"" && npm install --silent && npm run dev"
 
-echo [3/3] Demarrage du Tunnel NGROK pour l'application Mobile (Port 3001)...
+echo.
+echo [4/4] Demarrage du Tunnel NGROK pour l'application Mobile (Port 3001)...
 start "BAOU Ngrok Tunnel" cmd /k "ngrok http 3001"
 
 echo.
 echo Ouverture du Portail Admin dans votre navigateur...
-timeout /t 5 >nul
+ping -n 5 127.0.0.1 >nul
 start http://localhost:3000
 
 echo.
@@ -56,7 +63,7 @@ echo    4. Collez l'adresse et ajoutez /api/ a la fin
 echo       ex: https://xxxx.ngrok-free.app/api/
 echo    5. Cliquez sur Enregistrer
 echo.
-echo  CORRECTIONS v1.0.4 (Aout 2026) :
+echo  CORRECTIONS ET AMELIORATIONS v1.0.4 :
 echo    - Flux depot Wave corrige : portefeuille credite APRES paiement [OK]
 echo    - DepositScreen simplifie : Wave et Orange Money en 2 clics [OK]
 echo    - Routes manquantes ajoutees : update-profile, upload-doc, chat [OK]
