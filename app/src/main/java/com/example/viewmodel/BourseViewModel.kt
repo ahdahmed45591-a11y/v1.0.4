@@ -168,6 +168,27 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         val savedUrl = prefs.getString("server_url", "http://10.0.2.2:3001/api/") ?: "http://10.0.2.2:3001/api/"
         serverUrlInput.value = savedUrl
         com.example.data.network.ApiClient.updateBaseUrl(savedUrl)
+
+        // ── Restaurer le dépôt Wave en attente (survie au redémarrage de l'app) ──
+        val pendingAmt = prefs.getFloat("pending_wave_amount", 0f).toDouble()
+        if (pendingAmt > 0.0) {
+            pendingWaveDepositState.value = pendingAmt
+        }
+    }
+
+    // Appelé depuis onResume de MainActivity : restaure l'état + redirige si paiement en attente
+    fun checkPendingWaveOnResume(context: android.content.Context) {
+        val prefs = context.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
+        val pendingAmt = prefs.getFloat("pending_wave_amount", 0f).toDouble()
+        if (pendingAmt > 0.0 && pendingWaveDepositState.value <= 0.0) {
+            pendingWaveDepositState.value = pendingAmt
+        }
+        // Si un dépôt Wave est en attente, aller sur l'écran DEPOSIT pour montrer la bannière
+        if (pendingWaveDepositState.value > 0.0) {
+            if (_currentScreen.value != Screen.DEPOSIT) {
+                navigateTo(Screen.DEPOSIT)
+            }
+        }
     }
 
     fun saveServerUrl(url: String, context: android.content.Context) {
@@ -475,24 +496,31 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         val isWave = depositPaymentMethod.value == "Wave CI"
 
         if (isWave) {
+            // ── 1. Mémoriser le montant EN ATTENTE dans SharedPreferences ──
+            //    (survie si Android tue l'app pendant le paiement Wave)
             pendingWaveDepositState.value = amt
             depositAmountInput.value = ""
+            val prefs = context.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
+            prefs.edit().putFloat("pending_wave_amount", amt.toFloat()).apply()
 
             try {
-                val redirectUrl = android.net.Uri.encode("baou://payment/success?status=success&amount=${amt.toInt()}")
-                val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p&amount=${amt.toInt()}&redirect_url=$redirectUrl"
+                // ── 2. Ouvrir le lien marchand Wave (sans redirect_url car Wave ne le supporte pas) ──
+                val waveUrl = "https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p"
 
                 val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(waveUrl))
                 intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
 
                 viewModelScope.launch {
-                    _transactionStatus.emit("📱 Ouverture du compte marchand Wave (${amt.toInt()} FCFA)... Confirmez le paiement pour crédit immédiat.")
+                    _transactionStatus.emit("📱 Paiement Wave de ${amt.toInt()} FCFA initié. Revenez ici après avoir payé pour valider votre portefeuille.")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                // Réinitialiser si échec d'ouverture
+                pendingWaveDepositState.value = 0.0
+                prefs.edit().remove("pending_wave_amount").apply()
                 viewModelScope.launch {
-                    _transactionStatus.emit("Veuillez finaliser le paiement dans Wave puis revenir valider.")
+                    _transactionStatus.emit("Impossible d'ouvrir Wave. Vérifiez que Wave est installé.")
                 }
             }
         } else {
@@ -514,7 +542,11 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         val amtToCredit = amountOverride ?: pendingWaveDepositState.value
         if (amtToCredit <= 0) return
 
+        // ── Effacer immédiatement l'état EN ATTENTE (RAM + SharedPreferences) ──
         pendingWaveDepositState.value = 0.0
+        val context = getApplication<android.app.Application>().applicationContext
+        val prefs = context.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().remove("pending_wave_amount").apply()
 
         viewModelScope.launch {
             val success = repository.depositFunds(amtToCredit, "Wave CI")
@@ -523,7 +555,10 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
                 repository.syncTransactions()
                 navigateTo(Screen.PORTFOLIO)
             } else {
-                _transactionStatus.emit("Erreur lors de la confirmation du dépôt Wave.")
+                // En cas d'échec réseau, remettre en attente pour réessayer
+                pendingWaveDepositState.value = amtToCredit
+                prefs.edit().putFloat("pending_wave_amount", amtToCredit.toFloat()).apply()
+                _transactionStatus.emit("Erreur réseau. Réessayez dans quelques instants.")
             }
         }
     }

@@ -3220,39 +3220,93 @@ fun DepositScreen(viewModel: BourseViewModel) {
             Text("Alimenter mon compte", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
 
-        // ── Bannière paiement Wave en attente ──────────────────────
+        // ── Bannière paiement Wave en attente (PRIORITÉ MAXIMALE) ──
         if (pendingWaveAmt > 0) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1DA1F2).copy(alpha = 0.10f)),
-                border = BorderStroke(1.5.dp, Color(0xFF1DA1F2)),
-                shape = RoundedCornerShape(14.dp)
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0D47A1).copy(alpha = 0.92f)),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color(0xFF1DA1F2), modifier = Modifier.size(20.dp))
-                        Text("Paiement Wave en attente", fontWeight = FontWeight.Bold, color = TextPrimary)
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Titre proéminent
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.size(42.dp).clip(CircleShape)
+                                .background(Color(0xFF1DA1F2)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.AccountBalanceWallet,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                "Paiement Wave effectué ?",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                            Text(
+                                "Validez pour créditer votre portefeuille",
+                                fontSize = 12.sp,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
                     }
+
+                    // Montant en grand
                     Text(
-                        "Vous avez initié un dépôt de ${pendingWaveAmt.formatFcfa()} via Wave. Après avoir payé dans Wave, cliquez ci-dessous pour créditer votre portefeuille.",
-                        fontSize = 13.sp, color = TextSecondary, lineHeight = 18.sp
+                        pendingWaveAmt.formatFcfa(),
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 34.sp,
+                        color = Color.White
                     )
+
+                    Text(
+                        "Après avoir payé dans Wave, appuyez sur le bouton ci-dessous pour créditer votre compte BAOU.",
+                        fontSize = 13.sp,
+                        color = Color.White.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        lineHeight = 18.sp
+                    )
+
+                    // Bouton de confirmation principal (grand et visible)
                     Button(
                         onClick = { viewModel.confirmWaveDeposit() },
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DA1F2)),
-                        shape = RoundedCornerShape(12.dp)
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
+                        shape = RoundedCornerShape(14.dp)
                     ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("J'ai payé — Créditer ${pendingWaveAmt.formatFcfa()}", fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(22.dp), tint = Color.White)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            "✅  J'ai payé — Créditer ${pendingWaveAmt.formatFcfa()}",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 15.sp,
+                            color = Color.White
+                        )
                     }
-                    OutlinedButton(
-                        onClick = { viewModel.pendingWaveDepositState.value = 0.0 },
-                        modifier = Modifier.fillMaxWidth(),
-                        border = BorderStroke(1.dp, Color(0xFF1DA1F2))
+
+                    // Bouton d'annulation discret
+                    TextButton(
+                        onClick = {
+                            viewModel.pendingWaveDepositState.value = 0.0
+                            val ctx = viewModel.getApplication<android.app.Application>().applicationContext
+                            ctx.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
+                                .edit().remove("pending_wave_amount").apply()
+                        }
                     ) {
-                        Text("Annuler ce dépôt Wave", color = Color(0xFF1DA1F2), fontSize = 13.sp)
+                        Text("Je n'ai pas payé — Annuler ce dépôt", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
                     }
                 }
             }
