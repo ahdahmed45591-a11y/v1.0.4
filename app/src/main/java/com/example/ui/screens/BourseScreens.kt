@@ -3282,7 +3282,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
 
                     // Bouton de confirmation principal (grand et visible)
                     Button(
-                        onClick = { viewModel.confirmWaveDeposit() },
+                        onClick = { viewModel.confirmWaveDeposit(pendingWaveAmt) },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
                         shape = RoundedCornerShape(14.dp)
