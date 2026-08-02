@@ -266,17 +266,22 @@ class BourseRepository(private val bourseDao: BourseDao) {
 
     suspend fun depositFunds(amount: Double, paymentMethod: String): Boolean {
         if (amount <= 0) return false
-        
+
         val dateFormat = SimpleDateFormat("Aujourd'hui, HH:mm", Locale.getDefault())
         val dateString = dateFormat.format(Date())
         val reference = "REF-" + (100000..999999).random()
 
-        // 1. Mettre à jour le solde cash local immédiatement
-        val profile = bourseDao.getUserProfile()
-        if (profile != null) {
-            val updatedProfile = profile.copy(cashBalance = profile.cashBalance + amount)
-            bourseDao.insertUserProfile(updatedProfile)
-        }
+        // 1. Mettre à jour le solde cash local
+        //    Si le profil n'existe pas encore en DB (premier dépôt avant sync),
+        //    on crée un profil par défaut avec le montant crédité
+        val existingProfile = bourseDao.getUserProfile()
+        val updatedProfile = existingProfile?.copy(
+            cashBalance = existingProfile.cashBalance + amount
+        ) ?: com.example.data.local.UserEntity(
+            id = 1,
+            cashBalance = amount   // Premier dépôt : on initialise à ce montant
+        )
+        bourseDao.insertUserProfile(updatedProfile)
 
         // 2. Insérer la transaction de dépôt locale avec le statut TERMINÉ
         val depositTransaction = TransactionEntity(
@@ -307,11 +312,13 @@ class BourseRepository(private val bourseDao: BourseDao) {
                 syncTransactions()
             } catch (e: Exception) {
                 e.printStackTrace()
+                // L'erreur réseau ne bloque pas : le dépôt local est déjà enregistré
             }
         }
 
         return true
     }
+
 
     suspend fun buyStock(
         ticker: String,

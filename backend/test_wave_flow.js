@@ -1,95 +1,59 @@
 /**
- * TEST - Simulation du flux dépôt Wave complet
- * Vérifie que :
- * 1. Le montant est bien persisté (SharedPreferences simulé en mémoire)
- * 2. Après "redémarrage app", le montant est restauré
- * 3. confirmWaveDeposit() crédite correctement le portefeuille via l'API
+ * TEST COMPLET — Flux dépôt Wave + vérification solde dans l'admin
+ * 
+ * Vérifie :
+ * 1. Connexion et récupération du solde initial
+ * 2. Dépôt Wave de 50 000 FCFA
+ * 3. Le solde backend est bien incrémenté (+50 000)
+ * 4. La transaction apparaît dans la liste admin avec type=DEPOSIT
+ * 5. Le statut est "validated" (= APPROVED dans l'admin)
  */
 
 const BASE_URL = 'http://localhost:3001/api';
 
-async function runWaveDepositTests() {
-    console.log('\n🧪 TEST FLUX DÉPÔT WAVE — VÉRIFICATION PORTEFEUILLE\n' + '═'.repeat(60));
+async function runTests() {
+    let passed = 0;
+    let failed = 0;
 
-    // ── Étape 0 : Connexion ──────────────────────────────────────
-    console.log('\n[ÉTAPE 0] Connexion utilisateur test...');
+    const check = (label, condition, detail = '') => {
+        if (condition) {
+            console.log(`  ✅ [PASS] ${label}`);
+            passed++;
+        } else {
+            console.log(`  ❌ [FAIL] ${label}${detail ? ' — ' + detail : ''}`);
+            failed++;
+        }
+    };
+
+    console.log('\n🧪 TEST DÉPÔT WAVE + CRÉDIT PORTEFEUILLE\n' + '═'.repeat(60));
+
+    // ── Étape 0 : Inscription + Connexion ────────────────────────
+    console.log('\n[ÉTAPE 0] Inscription + connexion...');
+    const email = `wave_test_${Date.now()}@test.ci`;
+    const password = 'test1234';
+
+    const regRes = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, firstName: 'WaveTest', name: 'WaveTest' })
+    });
+    check('Inscription réussie', regRes.ok || regRes.status === 201, `status: ${regRes.status}`);
+
     const loginRes = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'test@wave.ci', password: 'testwave123' })
+        body: JSON.stringify({ email, password })
     });
+    check('Connexion réussie', loginRes.ok, `status: ${loginRes.status}`);
+    const loginData = await loginRes.json();
+    const token = loginData.token;
+    const soldeInitial = loginData.user?.balance ?? 0;
+    console.log(`  → Solde initial : ${soldeInitial} FCFA`);
+    check('Token JWT reçu', !!token);
 
-    let token = null;
-    let userId = null;
-
-    if (loginRes.ok) {
-        const loginData = await loginRes.json();
-        token = loginData.token;
-        userId = loginData.user?.id;
-        console.log(`  ✅ Connecté : ${loginData.user?.name} (solde: ${loginData.user?.balance || 0} FCFA)`);
-    } else {
-        // Créer le compte test
-        console.log('  → Création du compte test...');
-        const regRes = await fetch(`${BASE_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'test@wave.ci', password: 'testwave123', firstName: 'TestWave', name: 'TestWave' })
-        });
-        if (!regRes.ok) {
-            console.log('  ❌ Impossible de créer le compte test:', await regRes.text());
-            return;
-        }
-        // Reconnecter
-        const r2 = await fetch(`${BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'test@wave.ci', password: 'testwave123' })
-        });
-        const d2 = await r2.json();
-        token = d2.token;
-        userId = d2.user?.id;
-        console.log(`  ✅ Compte créé et connecté : ${d2.user?.name}`);
-    }
-
-    // ── Étape 1 : Simuler "Payer avec Wave" ─────────────────────
-    const montantWave = 25000;
-    console.log(`\n[ÉTAPE 1] Simulation "Payer avec Wave" (${montantWave} FCFA)...`);
-    // En vrai : executeDeposit() sauvegarde dans SharedPreferences
-    // Ici on simule : la valeur est mémorisée en variable (= SharedPreferences)
-    let sharedPrefs_pending_wave_amount = montantWave; // ← PERSISTÉ
-    console.log(`  ✅ Montant persisté dans SharedPreferences : ${sharedPrefs_pending_wave_amount} FCFA`);
-    console.log('  → L\'app ouvre Wave : https://pay.wave.com/m/M_ci_XRkfDq_9M8GP/c/ci/?src=p');
-
-    // ── Étape 2 : Simuler "Redémarrage de l'app" ────────────────
-    console.log('\n[ÉTAPE 2] Simulation redémarrage app (ViewModel détruit par Android)...');
-    let pendingWaveDepositState = 0.0; // ← ViewModel recréé = perd la valeur RAM
-    console.log(`  → pendingWaveDepositState RAM = ${pendingWaveDepositState} (perdu!)`);
-
-    // initializeServerUrl() restaure depuis SharedPreferences
-    const restoredAmt = sharedPrefs_pending_wave_amount; // ← RESTAURÉ
-    if (restoredAmt > 0) {
-        pendingWaveDepositState = restoredAmt;
-    }
-    console.log(`  ✅ Restauré depuis SharedPreferences : pendingWaveDepositState = ${pendingWaveDepositState} FCFA`);
-
-    // ── Étape 3 : Simuler "Retour dans l'app" (onResume) ────────
-    console.log('\n[ÉTAPE 3] Simulation onResume (retour depuis Wave)...');
-    // checkPendingWaveOnResume() → navigue vers Screen.DEPOSIT
-    console.log('  ✅ Navigation automatique vers écran DEPOSIT');
-    console.log('  ✅ Bannière "Paiement Wave effectué ?" affichée avec bouton vert');
-
-    // ── Étape 4 : Clic sur "J'ai payé" → confirmWaveDeposit() ───
-    console.log('\n[ÉTAPE 4] Simulation clic "J\'ai payé" → confirmWaveDeposit()...');
-
-    // Vérifier le solde AVANT
-    const txBefore = await fetch(`${BASE_URL}/transactions`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const txBeforeData = txBefore.ok ? await txBefore.json() : { data: [] };
-    const depotsBefore = (txBeforeData.data || []).filter(t => t.type === 'DEPOSIT').length;
-    console.log(`  → Dépôts existants avant : ${depotsBefore}`);
-
-    // Appel API : soumettre le dépôt Wave
+    // ── Étape 1 : Simulation clic "J'ai payé" (confirmWaveDeposit) ──
+    console.log('\n[ÉTAPE 1] Dépôt Wave de 50 000 FCFA...');
+    const montant = 50000;
     const depositRes = await fetch(`${BASE_URL}/transactions`, {
         method: 'POST',
         headers: {
@@ -100,40 +64,71 @@ async function runWaveDepositTests() {
             ticker: 'CASH',
             type: 'DEPOSIT',
             quantity: 1,
-            price: pendingWaveDepositState,
-            paymentRef: `WAVE-${Date.now()}`,
+            price: montant,
+            paymentRef: `WAVE-TEST-${Date.now()}`,
             paymentMethod: 'Wave CI'
         })
     });
+    check(`Dépôt enregistré (status ${depositRes.status})`, depositRes.status === 201, `status: ${depositRes.status}`);
+    const depositData = await depositRes.json();
+    check('Transaction de type DEPOSIT créée', depositData.data?.type === 'DEPOSIT', `type: ${depositData.data?.type}`);
+    check('Statut "validated"', depositData.data?.status === 'validated', `status: ${depositData.data?.status}`);
+    check('Montant correct', depositData.data?.total === montant, `montant: ${depositData.data?.total}`);
+    check('Méthode "Wave CI"', depositData.data?.paymentMethod === 'Wave CI', `méthode: ${depositData.data?.paymentMethod}`);
 
-    if (depositRes.ok || depositRes.status === 201) {
-        console.log(`  ✅ Dépôt Wave de ${pendingWaveDepositState} FCFA enregistré via API (status: ${depositRes.status})`);
-    } else {
-        const errText = await depositRes.text();
-        console.log(`  ⚠️  Dépôt API status ${depositRes.status}: ${errText}`);
+    // ── Étape 2 : Vérification que le solde a été mis à jour ─────
+    console.log('\n[ÉTAPE 2] Vérification solde après dépôt...');
+    const loginRes2 = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const loginData2 = await loginRes2.json();
+    const soldeApres = loginData2.user?.balance ?? 0;
+    console.log(`  → Solde après : ${soldeApres} FCFA (initial: ${soldeInitial}, +${montant})`);
+    check('Solde incrémenté de 50 000 FCFA', soldeApres === soldeInitial + montant, `attendu: ${soldeInitial + montant}, obtenu: ${soldeApres}`);
+
+    // ── Étape 3 : Vérification dans la liste admin ───────────────
+    console.log('\n[ÉTAPE 3] Vérification visibilité dans l\'admin...');
+
+    // Se connecter en admin
+    const adminLogin = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'admin@elephantbourse.ci', password: 'admin2024' })
+    });
+    const adminData = await adminLogin.json();
+    const adminToken = adminData.token;
+    check('Connexion admin réussie', !!adminToken);
+
+    const allTxRes = await fetch(`${BASE_URL}/transactions/all`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    check('Liste transactions admin accessible', allTxRes.ok);
+    const allTxData = await allTxRes.json();
+    const waveDeposit = (allTxData.data || []).find(t =>
+        t.paymentMethod === 'Wave CI' && t.type === 'DEPOSIT' && t.total === montant
+    );
+    check('Dépôt Wave visible dans l\'admin', !!waveDeposit, waveDeposit ? '' : 'introuvable');
+    if (waveDeposit) {
+        check('Badge type = DEPOSIT', waveDeposit.type === 'DEPOSIT');
+        check('Badge méthode = Wave CI', waveDeposit.paymentMethod === 'Wave CI');
+        check('Statut "validated" (APPROVED dans admin)', waveDeposit.status === 'validated');
     }
-
-    // ── Étape 5 : Vérifier SharedPreferences effacé ─────────────
-    sharedPrefs_pending_wave_amount = 0; // ← confirmWaveDeposit() efface la prefs
-    console.log('\n[ÉTAPE 5] Nettoyage SharedPreferences...');
-    console.log(`  ✅ pending_wave_amount effacé : ${sharedPrefs_pending_wave_amount} (ne reviendra plus après redémarrage)`);
 
     // ── Résumé ─────────────────────────────────────────────────
     console.log('\n' + '═'.repeat(60));
-    console.log('📋 RÉSUMÉ DU TEST FLUX WAVE');
-    console.log('═'.repeat(60));
-    console.log('  [OK] Montant persisté dans SharedPreferences au clic "Payer avec Wave"');
-    console.log('  [OK] Montant restauré après redémarrage ViewModel (onResume)');
-    console.log('  [OK] Navigation automatique vers écran DEPOSIT au retour');
-    console.log('  [OK] Bannière proéminente "J\'ai payé" affichée en bleu foncé');
-    console.log(`  [OK] Dépôt Wave de ${montantWave} FCFA soumis à l'API backend`);
-    console.log('  [OK] SharedPreferences nettoyé après confirmation');
-    console.log('  [OK] En cas d\'erreur réseau → montant remis en attente');
-    console.log('═'.repeat(60));
-    console.log('\n🎉 FLUX WAVE ENTIÈREMENT FONCTIONNEL — PORTEFEUILLE TOUJOURS MIS À JOUR !\n');
+    console.log(`📋 RÉSULTATS : ${passed} PASSÉS ✅  /  ${failed} ÉCHOUÉS ❌`);
+    if (failed === 0) {
+        console.log('🎉 TOUS LES TESTS PASSÉS — Dépôt Wave crédite bien LIQUIDITES CASH !');
+    } else {
+        console.log('⚠️  Des tests ont échoué — voir les détails ci-dessus.');
+        process.exit(1);
+    }
+    console.log('═'.repeat(60) + '\n');
 }
 
-runWaveDepositTests().catch(e => {
+runTests().catch(e => {
     console.error('❌ Erreur test:', e.message);
     process.exit(1);
 });

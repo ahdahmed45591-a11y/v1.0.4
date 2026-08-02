@@ -563,6 +563,18 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    // Annuler proprement un dépôt Wave en attente (appelé depuis le Composable)
+    // Centralise la logique SharedPreferences dans le ViewModel pour éviter les crashs
+    fun cancelPendingWaveDeposit() {
+        pendingWaveDepositState.value = 0.0
+        val context = getApplication<android.app.Application>().applicationContext
+        context.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
+            .edit().remove("pending_wave_amount").apply()
+        viewModelScope.launch {
+            _transactionStatus.emit("Dépôt Wave annulé.")
+        }
+    }
+
     fun executeOrder() {
         val profile = userProfile.value
         if (profile == null || profile.kycStep < 5) {

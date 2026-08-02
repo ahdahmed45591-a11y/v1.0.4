@@ -3299,12 +3299,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
 
                     // Bouton d'annulation discret
                     TextButton(
-                        onClick = {
-                            viewModel.pendingWaveDepositState.value = 0.0
-                            val ctx = viewModel.getApplication<android.app.Application>().applicationContext
-                            ctx.getSharedPreferences("baou_prefs", android.content.Context.MODE_PRIVATE)
-                                .edit().remove("pending_wave_amount").apply()
-                        }
+                        onClick = { viewModel.cancelPendingWaveDeposit() }
                     ) {
                         Text("Je n'ai pas payé — Annuler ce dépôt", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
                     }
