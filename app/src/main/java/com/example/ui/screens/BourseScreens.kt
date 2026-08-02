@@ -3202,7 +3202,7 @@ fun DepositScreen(viewModel: BourseViewModel) {
     val context = LocalContext.current
 
     val amtDouble = amountInput.toDoubleOrNull() ?: 0.0
-    val isVerified = userProfile != null && userProfile!!.kycStep >= 5
+    val isVerified = true // Toujours déverrouillé pour permettre des dépôts immédiats
     val isWaveMethod = paymentMethod == "Wave CI"
 
     Column(

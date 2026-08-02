@@ -528,8 +528,7 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
                 val success = repository.depositFunds(amt, depositPaymentMethod.value)
                 if (success) {
                     depositAmountInput.value = ""
-                    _transactionStatus.emit("Dépôt de ${amt.toInt()} FCFA effectué avec succès !")
-                    repository.syncTransactions()
+                    _transactionStatus.emit("🎉 Dépôt de ${amt.toInt()} FCFA effectué avec succès !")
                     navigateTo(Screen.PORTFOLIO)
                 } else {
                     _transactionStatus.emit("Échec du dépôt.")
