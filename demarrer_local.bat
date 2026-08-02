@@ -56,11 +56,12 @@ echo    4. Collez l'adresse et ajoutez /api/ a la fin
 echo       ex: https://xxxx.ngrok-free.app/api/
 echo    5. Cliquez sur Enregistrer
 echo.
-echo  NOUVEAUTES v1.0.4 :
-echo    - Microservices decoupes Core:3002 <-> REST API:3001 [OK]
-echo    - Ouverture directe compte marchand Wave M_ci_XRkfDq_9M8GP [OK]
-echo    - Validation auto portefeuille au retour de Wave [OK]
-echo    - Colonne Solde Cash et Recharges manuelles dans l'Admin [OK]
+echo  CORRECTIONS v1.0.4 (Aout 2026) :
+echo    - Flux depot Wave corrige : portefeuille credite APRES paiement [OK]
+echo    - DepositScreen simplifie : Wave et Orange Money en 2 clics [OK]
+echo    - Routes manquantes ajoutees : update-profile, upload-doc, chat [OK]
+echo    - Inscription corrigee : firstName et name acceptes [OK]
+echo    - Bouton "J'ai paye" + annulation depot Wave possibles [OK]
 echo ========================================================
 echo.
 pause

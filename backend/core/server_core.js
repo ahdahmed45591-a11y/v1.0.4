@@ -112,6 +112,22 @@ app.patch('/internal/auth/profile', (req, res) => {
   res.json({ success: true, user: safeUser });
 });
 
+// Upload document KYC (base64 ou statut)
+app.post('/internal/auth/upload-document', (req, res) => {
+  const { userId, docType, fileName, fileBase64 } = req.body;
+  if (!userId || !docType) {
+    return res.status(400).json({ error: 'userId et docType sont requis.' });
+  }
+  const user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+
+  if (!user.documents) user.documents = {};
+  user.documents[docType] = { fileName, uploadedAt: new Date().toISOString(), status: 'uploaded' };
+
+  saveUserToSupabase(user);
+  res.json({ success: true, message: `Document "${docType}" reçu avec succès.` });
+});
+
 // ── STOCKS CORE ──────────────────────────────────────────────
 app.get('/internal/stocks', (req, res) => {
   res.json({ success: true, count: stocks.length, data: stocks });

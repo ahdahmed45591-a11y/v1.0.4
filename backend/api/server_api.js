@@ -153,6 +153,50 @@ app.patch('/api/auth/profile', requireAuth, async (req, res) => {
   res.status(coreRes.status).json(coreRes.data);
 });
 
+// Compatibilité avec l'app mobile (POST au lieu de PATCH)
+app.post('/api/auth/update-profile', requireAuth, async (req, res) => {
+  const coreRes = await callCore('PATCH', '/internal/auth/profile', {
+    userId: req.session.userId,
+    ...req.body
+  });
+  res.status(coreRes.status).json(coreRes.data);
+});
+
+// Upload document (stocké dans le core)
+app.post('/api/auth/upload-document', requireAuth, async (req, res) => {
+  const coreRes = await callCore('POST', '/internal/auth/upload-document', {
+    userId: req.session.userId,
+    ...req.body
+  });
+  res.status(coreRes.status).json(coreRes.data);
+});
+
+// Chat client ↔ admin
+app.get('/api/auth/chat', requireAuth, async (req, res) => {
+  const coreRes = await callCore('GET', `/internal/chat/${req.session.userId}`);
+  res.status(coreRes.status).json(coreRes.data);
+});
+
+app.post('/api/auth/chat', requireAuth, async (req, res) => {
+  const coreRes = await callCore('POST', `/internal/chat/${req.session.userId}`, {
+    sender: 'client',
+    text: req.body.text,
+    userName: req.session.name,
+  });
+  res.status(coreRes.status).json(coreRes.data);
+});
+
+// Support client
+app.post('/api/auth/support', requireAuth, async (req, res) => {
+  const coreRes = await callCore('POST', '/internal/support', {
+    userId: req.session.userId,
+    userName: req.session.name,
+    email: req.session.email,
+    ...req.body
+  });
+  res.status(coreRes.status).json(coreRes.data);
+});
+
 // ── 3. STOCKS ROUTES ──────────────────────────────────────
 app.get('/api/stocks', async (req, res) => {
   const coreRes = await callCore('GET', '/internal/stocks');

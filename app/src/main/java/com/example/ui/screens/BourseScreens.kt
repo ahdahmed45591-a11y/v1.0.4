@@ -3166,17 +3166,12 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                         Text(errorMsg, color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton(
                             onClick = { activeSellHolding = null },
                             modifier = Modifier.weight(1f).height(48.dp),
                             shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text("Annuler")
-                        }
+                        ) { Text("Annuler") }
                         Button(
                             onClick = {
                                 if (qtyToSell <= 0 || qtyToSell > maxShares) {
@@ -3189,9 +3184,7 @@ fun PortfolioScreen(viewModel: BourseViewModel) {
                             modifier = Modifier.weight(1f).height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
                             shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text("Vendre", fontWeight = FontWeight.Bold)
-                        }
+                        ) { Text("Vendre", fontWeight = FontWeight.Bold) }
                     }
                 }
             }
@@ -3205,218 +3198,188 @@ fun DepositScreen(viewModel: BourseViewModel) {
     val amountInput by viewModel.depositAmountInput.collectAsStateWithLifecycle()
     val paymentMethod by viewModel.depositPaymentMethod.collectAsStateWithLifecycle()
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
-
+    val pendingWaveAmt by viewModel.pendingWaveDepositState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val amtDouble = amountInput.toDoubleOrNull() ?: 0.0
-    val formattedAmt = amtDouble.formatFcfa()
-    val pendingWaveAmt by viewModel.pendingWaveDepositState.collectAsStateWithLifecycle()
+    val isVerified = userProfile != null && userProfile!!.kycStep >= 5
+    val isWaveMethod = paymentMethod == "Wave CI"
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Toolbar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                IconButton(onClick = { viewModel.navigateBack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour", tint = OrangeBrand)
-                }
-                Text(
-                    text = "Alimenter mon compte",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { viewModel.navigateBack() }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour", tint = OrangeBrand)
             }
-
-            IconButton(onClick = { }, enabled = false) {
-                Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = Color.Transparent)
-            }
+            Text("Alimenter mon compte", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
 
-        // Banner de dépôt Wave en attente de confirmation
+        // ── Bannière paiement Wave en attente ──────────────────────
         if (pendingWaveAmt > 0) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1DA1F2).copy(alpha = 0.12f)),
-                border = BorderStroke(1.dp, Color(0xFF1DA1F2)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1DA1F2).copy(alpha = 0.10f)),
+                border = BorderStroke(1.5.dp, Color(0xFF1DA1F2)),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF1DA1F2))
-                        Text("Paiement Wave en cours", fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color(0xFF1DA1F2), modifier = Modifier.size(20.dp))
+                        Text("Paiement Wave en attente", fontWeight = FontWeight.Bold, color = TextPrimary)
                     }
                     Text(
-                        text = "Vous avez initié un dépôt Wave de ${pendingWaveAmt.formatFcfa()}. Confirmez dès que le paiement est effectué dans Wave pour créditer votre portefeuille.",
-                        fontSize = 12.sp,
-                        color = TextSecondary
+                        "Vous avez initié un dépôt de ${pendingWaveAmt.formatFcfa()} via Wave. Après avoir payé dans Wave, cliquez ci-dessous pour créditer votre portefeuille.",
+                        fontSize = 13.sp, color = TextSecondary, lineHeight = 18.sp
                     )
                     Button(
                         onClick = { viewModel.confirmWaveDeposit() },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DA1F2)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("J'ai payé — Créditer ${pendingWaveAmt.formatFcfa()}", fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = { viewModel.pendingWaveDepositState.value = 0.0 },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1DA1F2))
+                        border = BorderStroke(1.dp, Color(0xFF1DA1F2))
                     ) {
-                        Text("✅ Valider et créditer mon portefeuille (${pendingWaveAmt.formatFcfa()})", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("Annuler ce dépôt Wave", color = Color(0xFF1DA1F2), fontSize = 13.sp)
                     }
                 }
             }
         }
 
-        // Amount Input
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Montant du dépôt", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = amountInput,
-                onValueChange = { viewModel.depositAmountInput.value = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("deposit_amount_field"),
-                textStyle = MaterialTheme.typography.headlineMedium.copy(color = OrangeBrand, fontWeight = FontWeight.Bold),
-                trailingIcon = { Text("FCFA", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(end = 16.dp), color = OrangeBrand) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                shape = RoundedCornerShape(12.dp)
-            )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = OrangeBrand, modifier = Modifier.size(14.dp))
-                Text("Saisissez le montant de votre choix", fontSize = 11.sp, color = TextSecondary)
-            }
-        }
-
-        // Payment method selector
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Moyen de paiement", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-
-            val paymentOptions = listOf(
-                Pair("Orange Money", "Orange"),
-                Pair("Wave CI", "Wave"),
-                Pair("Moov Money", "Moov"),
-                Pair("Carte Bancaire", "Carte")
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.height(180.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(paymentOptions.size) { index ->
-                    val option = paymentOptions[index]
-                    val isSelected = paymentMethod == option.first
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (isSelected) OrangeBrand.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface)
-                            .border(2.dp, if (isSelected) OrangeBrand else GrayBorder, RoundedCornerShape(12.dp))
-                            .clickable { viewModel.depositPaymentMethod.value = option.first }
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            // Render nice text placeholder for logo
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(
-                                        when (option.second) {
-                                            "Orange" -> Color(0xFFFF7900)
-                                            "Wave" -> Color(0xFF1DA1F2)
-                                            "Moov" -> Color(0xFF005DA4)
-                                            else -> GrayBorder
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (option.second == "Carte") {
-                                    Icon(Icons.Default.CreditCard, contentDescription = null, tint = DarkOnBackground)
-                                } else {
-                                    Text(
-                                        text = option.second.uppercase(),
-                                        color = Color.White,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 8.sp
-                                    )
-                                }
-                            }
-                            Text(option.first, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        }
-                    }
-                }
-            }
-        }
-
-        // Detailed recap
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(1.dp, GrayBorder)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = OrangeBrand)
-                    Text("Récapitulatif", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Montant saisi", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(formattedAmt, fontWeight = FontWeight.Bold)
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Frais de transaction (0%)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("0 FCFA", fontWeight = FontWeight.Bold, color = GainGreen)
-                }
-                HorizontalDivider(color = GrayBorder)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Total à créditer", fontWeight = FontWeight.Bold)
-                    Text(formattedAmt, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = OrangeBrand)
-                }
-            }
-        }
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.HistoryEdu, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    text = "Cette transaction sera automatiquement enregistrée dans votre historique d'activités pour un suivi de votre patrimoine.",
-                    style = MaterialTheme.typography.bodySmall,
-                    lineHeight = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        // ── Saisie du montant ──────────────────────────────────────
+        Text("Montant à déposer", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        OutlinedTextField(
+            value = amountInput,
+            onValueChange = { viewModel.depositAmountInput.value = it.filter { c -> c.isDigit() } },
+            modifier = Modifier.fillMaxWidth().testTag("deposit_amount_field"),
+            placeholder = { Text("Ex: 50000", color = TextSecondary) },
+            textStyle = MaterialTheme.typography.headlineMedium.copy(color = OrangeBrand, fontWeight = FontWeight.Bold),
+            trailingIcon = { Text("FCFA", fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(end = 16.dp), color = OrangeBrand) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(5000, 25000, 50000, 100000).forEach { preset ->
+                FilterChip(
+                    selected = amountInput == preset.toString(),
+                    onClick = { viewModel.depositAmountInput.value = preset.toString() },
+                    label = { Text("${preset / 1000}k", fontSize = 11.sp) },
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
 
-        val isVerified = userProfile != null && userProfile!!.kycStep >= 5
-        Button(
-            onClick = { viewModel.executeDeposit(context) },
+        // ── Méthode de paiement ────────────────────────────────────
+        Text("Moyen de paiement", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+
+        val waveSelected = paymentMethod == "Wave CI"
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
-                .testTag("confirm_deposit_button"),
-            colors = ButtonDefaults.buttonColors(containerColor = if (isVerified) OrangeBrand else Color.Gray),
-            enabled = isVerified && amtDouble > 0.0,
-            shape = RoundedCornerShape(12.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (waveSelected) Color(0xFF1DA1F2).copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface)
+                .border(2.dp, if (waveSelected) Color(0xFF1DA1F2) else GrayBorder, RoundedCornerShape(14.dp))
+                .clickable { viewModel.depositPaymentMethod.value = "Wave CI" }
+                .padding(16.dp)
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF1DA1F2)), contentAlignment = Alignment.Center) {
+                    Text("WAVE", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 9.sp)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Wave CI", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text("Paiement direct via l'application Wave", fontSize = 12.sp, color = TextSecondary)
+                }
+                if (waveSelected) Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF1DA1F2))
+            }
+        }
+
+        val omSelected = paymentMethod == "Orange Money"
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (omSelected) Color(0xFFFF7900).copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface)
+                .border(2.dp, if (omSelected) Color(0xFFFF7900) else GrayBorder, RoundedCornerShape(14.dp))
+                .clickable { viewModel.depositPaymentMethod.value = "Orange Money" }
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFF7900)), contentAlignment = Alignment.Center) {
+                    Text("OM", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Orange Money", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text("Mobile Money Orange CI", fontSize = 12.sp, color = TextSecondary)
+                }
+                if (omSelected) Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFFFF7900))
+            }
+        }
+
+        // ── Récapitulatif montant ──────────────────────────────────
+        if (amtDouble > 0) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = OrangeBrand.copy(alpha = 0.06f)),
+                border = BorderStroke(1.dp, OrangeBrand.copy(alpha = 0.3f)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Total à créditer", fontWeight = FontWeight.SemiBold, color = TextSecondary)
+                    Text(amtDouble.formatFcfa(), fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = OrangeBrand)
+                }
+            }
+        }
+
+        // ── Bouton principal ───────────────────────────────────────
+        val buttonText = when {
+            !isVerified -> "Dossier non validé"
+            amtDouble <= 0 -> "Saisissez un montant"
+            isWaveMethod -> "Payer avec Wave →"
+            else -> "Confirmer le dépôt"
+        }
+
+        Button(
+            onClick = { viewModel.executeDeposit(context) },
+            modifier = Modifier.fillMaxWidth().height(56.dp).testTag("confirm_deposit_button"),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isWaveMethod) Color(0xFF1DA1F2) else OrangeBrand,
+                disabledContainerColor = Color.Gray.copy(alpha = 0.4f)
+            ),
+            enabled = isVerified && amtDouble > 0.0,
+            shape = RoundedCornerShape(14.dp)
+        ) {
+            if (isWaveMethod) Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+            else Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(buttonText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+
+        if (!isVerified) {
             Text(
-                text = if (isVerified) "Confirmer le dépôt" else "Dépôt Verrouillé (Non Validé)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                "Votre dossier KYC doit être validé par l'administrateur pour effectuer des dépôts.",
+                fontSize = 12.sp, color = TextSecondary, textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
