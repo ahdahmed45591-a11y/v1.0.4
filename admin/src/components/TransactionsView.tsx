@@ -46,7 +46,7 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
   // Main view state filters
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'ANONYMIZED'>('ALL');
-  const [typeFilter, setTypeFilter] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'BUY' | 'SELL' | 'DEPOSIT'>('ALL');
   const [period, setPeriod] = useState('01/10/2023 - 31/10/2023');
 
   // Rejection modal state
@@ -489,8 +489,9 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
             className="bg-white border border-[#dec1af]/40 rounded-lg px-3 py-1.5 text-[13px] font-sans text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#ff8200] outline-none shadow-sm min-w-[160px]"
           >
             <option value="ALL">Tous Types</option>
-            <option value="BUY">Achat (Stock)</option>
-            <option value="SELL">Vente (Liquidation)</option>
+            <option value="DEPOSIT">💰 Dépôt (Wave / Orange Money)</option>
+            <option value="BUY">📈 Achat (Stock)</option>
+            <option value="SELL">📉 Vente (Liquidation)</option>
           </select>
         </div>
 
@@ -554,7 +555,8 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
                 <tr className="bg-[#f8f9ff] border-b border-[#dec1af]/30 text-[#574235] font-sans font-bold text-[11px] uppercase tracking-wider">
                   <th className="px-6 py-4">Client</th>
                   <th className="px-6 py-4">N° Commande</th>
-                  <th className="px-6 py-4">Date d'Upload</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4">Méthode</th>
                   <th className="px-6 py-4 text-right">Montant</th>
                   <th className="px-6 py-4">Statut</th>
@@ -593,6 +595,22 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
                     {/* Date/time of upload */}
                     <td className="px-6 py-4 font-sans text-[13px] text-[#574235]/80">
                       {tx.dateString}
+                    </td>
+                    {/* Type Badge */}
+                    <td className="px-6 py-4">
+                      {tx.type === 'DEPOSIT' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-bold text-[11px] border border-blue-200">
+                          💰 Dépôt
+                        </span>
+                      ) : tx.type === 'SELL' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-bold text-[11px] border border-red-200">
+                          📉 Vente
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
+                          📈 Achat
+                        </span>
+                      )}
                     </td>
                     {/* Payment Method Badge */}
                     <td className="px-6 py-4">
