@@ -135,33 +135,35 @@ class BourseRepository(private val bourseDao: BourseDao) {
         val currentToken = token ?: return false
         return try {
             val response = com.example.data.network.ApiClient.service.getTransactions(currentToken)
-            if (response.success) {
-                // Convertir les transactions réseau en entités locales
+            if (response.success && response.data != null) {
+                // Convertir les transactions réseau en entités locales de façon 100% sécurisée (sans crash si un champ est null)
                 val localTxs = response.data.map { netTx ->
-                    val statusFmt = when(netTx.status) {
+                    val statusFmt = when (netTx.status) {
                         "validated" -> "TERMINÉ"
                         "rejected" -> "ANNULÉ"
                         else -> "EN ATTENTE"
                     }
-                    val amountFmt = if (netTx.type == "BUY") -netTx.total else netTx.total
-                    val titleFmt = when(netTx.type) {
-                        "BUY" -> "Achat ${netTx.company}"
-                        "SELL" -> "Vente ${netTx.company}"
-                        "DEPOSIT", "RECHARGE" -> netTx.company.ifEmpty { "Dépôt ${netTx.paymentMethod ?: "Wave"}" }
-                        else -> "Transaction ${netTx.company}"
+                    val txTotal = netTx.total
+                    val amountFmt = if (netTx.type == "BUY") -txTotal else txTotal
+                    val companyStr = netTx.company ?: netTx.ticker
+                    val titleFmt = when (netTx.type) {
+                        "BUY" -> "Achat $companyStr"
+                        "SELL" -> "Vente $companyStr"
+                        "DEPOSIT", "RECHARGE" -> if (companyStr.isEmpty()) "Dépôt ${netTx.paymentMethod ?: "Wave"}" else companyStr
+                        else -> "Transaction $companyStr"
                     }
                     TransactionEntity(
                         type = if (netTx.type == "RECHARGE") "DEPOSIT" else netTx.type,
                         title = titleFmt,
                         date = "Aujourd'hui",
-                        reference = netTx.id,
+                        reference = netTx.id.ifEmpty { "REF-${(100000..999999).random()}" },
                         status = statusFmt,
                         amount = amountFmt,
                         sharesQty = netTx.quantity,
                         stockTicker = netTx.ticker
                     )
                 }
-                
+
                 // Mettre à jour Room
                 bourseDao.clearAllTransactions()
                 for (tx in localTxs) {
@@ -172,8 +174,8 @@ class BourseRepository(private val bourseDao: BourseDao) {
                 val profile = bourseDao.getUserProfile()
                 if (profile != null) {
                     var balance = profile.cashBalance
-                    
-                    // On recalcule aussi les positions locales d'après les transactions validées
+
+                    // On recalcule les positions locales d'après les transactions validées
                     bourseDao.clearAllHoldings()
                     val holdingsMap = mutableMapOf<String, HoldingsEntity>()
 
@@ -182,35 +184,39 @@ class BourseRepository(private val bourseDao: BourseDao) {
                         var calculatedBalance = 0.0
                         for (netTx in response.data) {
                             if (netTx.status == "validated") {
+                                val ticker = netTx.ticker.ifEmpty { "UNKN" }
+                                val company = netTx.company ?: ticker
+                                val txGrandTotal = netTx.grandTotal ?: netTx.total
+
                                 if (netTx.type == "BUY") {
-                                    calculatedBalance -= netTx.grandTotal
-                                    val existing = holdingsMap[netTx.ticker]
+                                    calculatedBalance -= txGrandTotal
+                                    val existing = holdingsMap[ticker]
                                     if (existing != null) {
                                         val newQty = existing.sharesCount + netTx.quantity
-                                        holdingsMap[netTx.ticker] = existing.copy(
+                                        holdingsMap[ticker] = existing.copy(
                                             sharesCount = newQty,
                                             currentPrice = netTx.price
                                         )
                                     } else {
-                                        holdingsMap[netTx.ticker] = HoldingsEntity(
-                                            ticker = netTx.ticker,
-                                            companyName = netTx.company,
+                                        holdingsMap[ticker] = HoldingsEntity(
+                                            ticker = ticker,
+                                            companyName = company,
                                             sharesCount = netTx.quantity,
                                             averagePrice = netTx.price,
                                             currentPrice = netTx.price,
-                                            changePercent = 1.25, // défaut
+                                            changePercent = 1.25,
                                             sector = "Bourse"
                                         )
                                     }
                                 } else if (netTx.type == "SELL") {
                                     calculatedBalance += netTx.total
-                                    val existing = holdingsMap[netTx.ticker]
+                                    val existing = holdingsMap[ticker]
                                     if (existing != null) {
                                         val newQty = existing.sharesCount - netTx.quantity
                                         if (newQty <= 0) {
-                                            holdingsMap.remove(netTx.ticker)
+                                            holdingsMap.remove(ticker)
                                         } else {
-                                            holdingsMap[netTx.ticker] = existing.copy(sharesCount = newQty)
+                                            holdingsMap[ticker] = existing.copy(sharesCount = newQty)
                                         }
                                     }
                                 } else if (netTx.type == "DEPOSIT" || netTx.type == "RECHARGE") {

@@ -31,23 +31,23 @@ data class TransactionRequest(
 )
 
 data class TransactionNetworkData(
-    val id: String,
-    val userId: String,
-    val userName: String,
-    val ticker: String,
-    val company: String,
-    val type: String,
-    val quantity: Int,
-    val price: Double,
-    val total: Double,
-    val fees: Double,
-    val tva: Double,
-    val grandTotal: Double,
-    val status: String,
-    val paymentRef: String?,
-    val paymentMethod: String?,
-    val rejectionReason: String?,
-    val submittedAt: String
+    val id: String = "",
+    val userId: String = "",
+    val userName: String = "",
+    val ticker: String = "CASH",
+    val company: String? = null,
+    val type: String = "DEPOSIT",
+    val quantity: Int = 1,
+    val price: Double = 0.0,
+    val total: Double = 0.0,
+    val fees: Double? = 0.0,
+    val tva: Double? = 0.0,
+    val grandTotal: Double? = 0.0,
+    val status: String = "validated",
+    val paymentRef: String? = null,
+    val paymentMethod: String? = null,
+    val rejectionReason: String? = null,
+    val submittedAt: String? = null
 )
 
 data class TransactionsResponse(val success: Boolean, val count: Int, val data: List<TransactionNetworkData>)
