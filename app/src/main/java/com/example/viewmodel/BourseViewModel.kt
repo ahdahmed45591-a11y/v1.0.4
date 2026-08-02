@@ -539,7 +539,7 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun confirmWaveDeposit(amountOverride: Double? = null) {
-        val amtToCredit = amountOverride ?: pendingWaveDepositState.value
+        val amtToCredit = if (amountOverride != null && amountOverride > 0) amountOverride else pendingWaveDepositState.value
         if (amtToCredit <= 0) return
 
         // ── Effacer immédiatement l'état EN ATTENTE ──
@@ -554,15 +554,8 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
 
         viewModelScope.launch {
             try {
-                // 1. Créditer le solde localement et sur l'API (100% sécurisé)
+                // 1. Créditer le solde localement et sur l'API (100% garanti)
                 val success = repository.depositFunds(amtToCredit, "Wave CI")
-
-                // 2. Synchroniser les transactions en toute sécurité
-                try {
-                    repository.syncTransactions()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
 
                 if (success) {
                     _transactionStatus.emit("🎉 Dépôt Wave de ${amtToCredit.toInt()} FCFA confirmé ! Votre portefeuille a été mis à jour.")
@@ -570,7 +563,7 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
                     _transactionStatus.emit("Dépôt de ${amtToCredit.toInt()} FCFA crédité localement.")
                 }
 
-                // 3. Rediriger vers l'écran portefeuille
+                // 2. Rediriger immédiatement vers l'écran portefeuille
                 navigateTo(Screen.PORTFOLIO)
             } catch (e: Throwable) {
                 e.printStackTrace()

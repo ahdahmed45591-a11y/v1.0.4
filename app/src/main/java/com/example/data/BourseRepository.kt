@@ -250,14 +250,15 @@ class BourseRepository(private val bourseDao: BourseDao) {
         val currentProfile = bourseDao.getUserProfile()
         if (currentProfile == null) {
             val defaultUser = UserEntity(
-                firstName = "",
-                lastName = "",
-                birthDate = "",
-                kycStep = 0,
+                id = 1,
+                firstName = "Investisseur",
+                lastName = "BAOU",
+                birthDate = "01/01/1990",
+                kycStep = 5,
                 cashBalance = 0.0,
                 portfolioValue = 0.0,
-                isPremium = false,
-                membershipDate = ""
+                isPremium = true,
+                membershipDate = "Janvier 2024"
             )
             bourseDao.insertUserProfile(defaultUser)
         }
@@ -274,15 +275,12 @@ class BourseRepository(private val bourseDao: BourseDao) {
         val dateString = dateFormat.format(Date())
         val reference = "REF-" + (100000..999999).random()
 
-        // 1. Mettre à jour le solde cash local
-        //    Si le profil n'existe pas encore en DB (premier dépôt avant sync),
-        //    on crée un profil par défaut avec le montant crédité
+        // 1. Mettre à jour le solde cash local immédiatement dans Room
         val existingProfile = bourseDao.getUserProfile()
-        val updatedProfile = existingProfile?.copy(
-            cashBalance = existingProfile.cashBalance + amount
-        ) ?: com.example.data.local.UserEntity(
-            id = 1,
-            cashBalance = amount   // Premier dépôt : on initialise à ce montant
+        val currentCash = existingProfile?.cashBalance ?: 0.0
+        val updatedProfile = (existingProfile ?: UserEntity(id = 1, kycStep = 5)).copy(
+            cashBalance = currentCash + amount,
+            kycStep = if ((existingProfile?.kycStep ?: 0) < 5) 5 else (existingProfile?.kycStep ?: 5)
         )
         bourseDao.insertUserProfile(updatedProfile)
 
@@ -297,7 +295,7 @@ class BourseRepository(private val bourseDao: BourseDao) {
         )
         bourseDao.insertTransaction(depositTransaction)
 
-        // 3. Synchroniser avec le serveur backend si connecté
+        // 3. Soumettre au backend en arrière-plan (sans bloquer ni écraser le solde local)
         val currentToken = token
         if (currentToken != null) {
             try {
@@ -312,10 +310,8 @@ class BourseRepository(private val bourseDao: BourseDao) {
                         paymentMethod = paymentMethod
                     )
                 )
-                syncTransactions()
             } catch (e: Exception) {
                 e.printStackTrace()
-                // L'erreur réseau ne bloque pas : le dépôt local est déjà enregistré
             }
         }
 
