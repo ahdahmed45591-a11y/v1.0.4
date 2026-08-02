@@ -225,7 +225,7 @@ class BourseRepository(private val bourseDao: BourseDao) {
                             }
                         }
                         if (calculatedBalance > 0) {
-                            balance = calculatedBalance
+                            balance = maxOf(profile.cashBalance, calculatedBalance)
                         }
                     }
 

@@ -64,25 +64,25 @@ class BourseViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedStock = MutableStateFlow<StockWatchItem?>(null)
     val selectedStock: StateFlow<StockWatchItem?> = _selectedStock.asStateFlow()
 
-    // Observable Flows from Room
+    // Observable Flows from Room — Eagerly pour mise à jour instantanée de l'UI
     val userProfile: StateFlow<UserEntity?> = repository.userProfile
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = null
         )
 
     val transactions: StateFlow<List<TransactionEntity>> = repository.allTransactions
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
 
     val holdings: StateFlow<List<HoldingsEntity>> = repository.allHoldings
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
 
