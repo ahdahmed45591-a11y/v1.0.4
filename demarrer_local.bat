@@ -45,7 +45,7 @@ echo    Email       : admin@elephantbourse.ci
 echo    Mot de passe: admin2024
 echo.
 echo  ARCHITECTURE MICROSERVICES :
-echo    - Core Service (Moteur & DB) : http://localhost:3002
+echo    - Core Service (Moteur et DB) : http://localhost:3002
 echo    - REST API Gateway           : http://localhost:3001
 echo.
 echo  PAIEMENT MARCHAND WAVE CI :
